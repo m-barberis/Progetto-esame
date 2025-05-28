@@ -44,9 +44,10 @@ public class Recorder {
         new Thread( ()-> {
             initRecorder();
             doRecording();
-
+            /*
             audioRecord.release();
             audioRecord = null;
+             */
 
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(()-> {
@@ -65,15 +66,11 @@ public class Recorder {
     private void initRecorder() {
 
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+            Log.e(TAG, "RECORD_AUDIO permission not granted!");
             return;
         }
+
+        Log.i(TAG, "Initializing AudioRecord");
         audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC,
                 samplingRate_inHz,
                 AudioFormat.CHANNEL_IN_MONO,
