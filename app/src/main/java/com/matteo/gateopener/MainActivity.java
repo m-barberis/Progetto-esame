@@ -7,6 +7,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.matteo.gateopener.interfaces.IRecordingDone;
+import com.matteo.gateopener.processor.Processor;
 import com.matteo.gateopener.recorder.Recorder;
 
 import java.io.File;
@@ -18,6 +19,8 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
     private TextView tvSpeaker;
     private Recorder recorder;
     private boolean shouldRecordingKeepGoing = false;
+    private File wavFile;
+    float[][] mfccMatrix;
     private final int FS = 8000; //da cambiare
     private final int RECORDING_LENGTH_IN_SEC = 1; //volendo pure
 
@@ -57,7 +60,8 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
     public void onRecordingDone(short[] audioData) {
         //TODO
         try {
-            recorder.saveAsWav(new File(getExternalFilesDir(null), "recorded.wav"));
+            wavFile = recorder.saveAsWav(new File(getExternalFilesDir(null), "recorded.wav"));
+            mfccMatrix = Processor.extractMFCC(wavFile);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

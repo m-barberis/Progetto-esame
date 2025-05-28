@@ -86,7 +86,7 @@ public class Recorder {
         audioRecord.read(audioData, 0, nSamples);
     }
 
-    public void saveAsWav(File file) throws IOException {
+    public File saveAsWav(File file) throws IOException {
         byte[] byteData = shortToByte(audioData);
         int byteRate = samplingRate_inHz * 2;
 
@@ -94,6 +94,7 @@ public class Recorder {
             writeWavHeader(out, audioData.length * 2, samplingRate_inHz, (short) 1, (short) 16);
             out.write(byteData);
         }
+        return file;
     }
 
     private byte[] shortToByte(short[] data) {
