@@ -9,6 +9,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.matteo.gateopener.interfaces.IRecordingDone;
 import com.matteo.gateopener.recorder.Recorder;
 
+import java.io.File;
+import java.io.IOException;
+
 public class MainActivity extends AppCompatActivity implements IRecordingDone {
     private final String TAG = "MainActivity";
     private Button bttRecord, bttStop;
@@ -53,5 +56,10 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
     @Override
     public void onRecordingDone(short[] audioData) {
         //TODO
+        try {
+            recorder.saveAsWav(new File(getExternalFilesDir(null), "recorded.wav"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
