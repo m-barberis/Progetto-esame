@@ -26,6 +26,15 @@
         android:textSize="30dp"
         android:gravity="center_horizontal"/>
 
+    <Button
+        android:id="@+id/bttStop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Stop"
+        android:textSize="30dp"
+        android:layout_marginTop="15dp"
+        android:gravity="center_horizontal"/>
+
     <TextView
         android:id="@+id/tvSpeaker"
         android:layout_width="wrap_content"

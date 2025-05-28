@@ -1,4 +1,4 @@
-package com.matteo.gateopener;
+package com.matteo.gateopener.recorder;
 
 import android.Manifest;
 import android.content.Context;
@@ -21,7 +21,7 @@ public class Recorder {
     private short[] audioData;
 
     private AudioRecord audioRecord;
-    private IRecordingDone IRecordingDone;
+    private com.matteo.gateopener.interfaces.IRecordingDone IRecordingDone;
 
     public Recorder(Context context, int samplingRate_inHz, int recordingLength_inSec) {
         this.context = context;
@@ -45,6 +45,12 @@ public class Recorder {
             });
 
         }).start();
+    }
+
+    public void stop() {
+        audioRecord.stop();
+        audioRecord.release();
+        audioRecord = null;
     }
 
     private void initRecorder() {
