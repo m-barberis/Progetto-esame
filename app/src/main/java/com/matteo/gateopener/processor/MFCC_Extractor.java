@@ -10,7 +10,7 @@ import be.tarsos.dsp.mfcc.MFCC;
 public class MFCC_Extractor {
 
     private int SAMPLE_RATE;
-    private int FRAME_SIZE = 400; // 25 ms
+    private int FRAME_SIZE = 400; // 25 ms a 16khz
     private int HOP_SIZE = 160;   // 10 ms
     private int MFCC_COUNT = 13;
 

@@ -1,29 +1,29 @@
 package com.matteo.gateopener;
 
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.widget.Button;
+import android.widget.Chronometer;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.matteo.gateopener.interfaces.IRecordingDone;
+import com.matteo.gateopener.misc.Constants;
 import com.matteo.gateopener.processor.MFCC_Extractor;
 import com.matteo.gateopener.recorder.Recorder;
-
-import java.io.File;
-import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity implements IRecordingDone {
     private final String TAG = "MainActivity";
     private Button bttRecord, bttStop;
     private TextView tvSpeaker;
+    private Chronometer chronometer;
     private Recorder recorder;
     private MFCC_Extractor mfcc_extractor;
     private boolean shouldRecordingKeepGoing = false;
     //private File wavFile;
     float[][] mfccMatrix;
-    private final int FS = 8000; //da cambiare
-    private final int RECORDING_LENGTH_IN_SEC = 1; //volendo pure
+    private final int FS = 16000; //da cambiare
 
 
 
@@ -34,8 +34,8 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
         setContentView(R.layout.activity_main);
 
         initViews();
-        recorder = new Recorder(this, FS, RECORDING_LENGTH_IN_SEC);
-        mfcc_extractor = new MFCC_Extractor(16000, 400, 160, 13);
+        recorder = new Recorder(this, Constants.AUDIO_SAMPLING_FREQUENCY, Constants.MAX_RECORDING_TIME_S, Constants.DEFAULT_SILENCE_THRESHOLD, Constants.FRAME_LENGTH_SAMPLES);
+        mfcc_extractor = new MFCC_Extractor(Constants.AUDIO_SAMPLING_FREQUENCY, Constants.FRAME_SIZE, Constants.FRAME_HOP_SIZE, Constants.MFCC_COUNT);
 
 
         bttRecord.setOnClickListener( (v) -> {
@@ -43,13 +43,17 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
             recorder.start();
             bttRecord.setEnabled(false);
             bttStop.setEnabled(true);
-
+            chronometer.setBase(SystemClock.elapsedRealtime());
+            chronometer.start();
         } );
+
         bttStop.setOnClickListener( (v) -> {
             shouldRecordingKeepGoing = false;
             recorder.stop();
             bttRecord.setEnabled(true);
             bttStop.setEnabled(false);
+            chronometer.stop();
+            //chronometer.setText("00:00");
         } );
     }
 
@@ -57,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
         bttRecord = findViewById(R.id.bttRecord);
         bttStop = findViewById(R.id.bttStop);
         tvSpeaker = findViewById(R.id.tvSpeaker);
+        chronometer = findViewById(R.id.chronometer);
     }
 
     @Override

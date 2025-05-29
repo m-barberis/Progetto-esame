@@ -10,6 +10,7 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.util.Log;
 
 import java.io.File;
@@ -17,6 +18,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.DataOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import androidx.core.app.ActivityCompat;
 
@@ -24,40 +27,46 @@ public class Recorder {
     private final String TAG = "Recorder";
     private final Context context;
     private int samplingRate_inHz;
-    private int recordingLength_inSec;
-    private int nSamples;
+    private int max_recordingLength_inSec;
     private short[] audioData;
 
+    int silenceThreshold;
+    private volatile boolean isRecording = false;
+    private List<Short> audioDataList = new ArrayList<>();
     private AudioRecord audioRecord;
     private IRecordingDone IRecordingDone;
+    private int frame_length_samples;
 
-    public Recorder(Context context, int samplingRate_inHz, int recordingLength_inSec) {
+    public Recorder(Context context, int samplingRate_inHz, int max_recordingLength_inSec, int silenceThreshold, int frame_length_samples) {
         this.context = context;
         this.samplingRate_inHz = samplingRate_inHz;
-        this.recordingLength_inSec = recordingLength_inSec;
+        this.max_recordingLength_inSec = max_recordingLength_inSec;
+        this.silenceThreshold = silenceThreshold;
+        this.frame_length_samples = frame_length_samples;
 
-        nSamples = samplingRate_inHz*recordingLength_inSec;
         IRecordingDone = (IRecordingDone) context;
     }
 
     public void start() {
         new Thread( ()-> {
             initRecorder();
-            doRecording();
-            /*
-            audioRecord.release();
-            audioRecord = null;
-             */
+            isRecording = true;
+            if (doRecording() != 0){
 
+            };
+            audioData = new short[audioDataList.size()];
+            for (int i = 0; i < frame_length_samples; i++){
+                audioData[i] = audioDataList.get(i);
+            }
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(()-> {
                 IRecordingDone.onRecordingDone(audioData);
             });
-
         }).start();
     }
 
     public void stop() {
+        isRecording = false;
         audioRecord.stop();
         audioRecord.release();
         audioRecord = null;
@@ -75,15 +84,54 @@ public class Recorder {
                 samplingRate_inHz,
                 AudioFormat.CHANNEL_IN_MONO,
                 AudioFormat.ENCODING_PCM_16BIT,
-                2*nSamples);
-        audioData = new short[nSamples];
+                2*frame_length_samples);
+        //audioData = new short[nSamples];
     }
 
-    private void doRecording() {
+    private boolean doRecording() {
         Log.i(TAG, "doRecording");
 
+        int read = 0;
+
+        boolean hasStarted = false;
+
+        int bufferSize = AudioRecord.getMinBufferSize(samplingRate_inHz, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+
+        short[] buffer = new short[bufferSize];
+
         audioRecord.startRecording();
-        audioRecord.read(audioData, 0, nSamples);
+
+        long start_time = System.currentTimeMillis();
+
+        while (isRecording) {
+            if (System.currentTimeMillis() - start_time >= 1000 * max_recordingLength_inSec){
+                return;
+            }
+            read = audioRecord.read(buffer, 0, frame_length_samples);
+            if (read > 0){
+                if (hasStarted){
+                    for (int i = 0; i < frame_length_samples; i++){
+                        audioDataList.add(buffer[i]);
+                    }
+                }
+                else {
+                    if (!isSilent(buffer, silenceThreshold, frame_length_samples)){
+                        hasStarted = true;
+                    }
+                }
+            }
+        }
+
+
+    }
+
+    private boolean isSilent(short[] audioBuffer, int nBufferSamples, int threshold){
+        for (int i = 0; i < nBufferSamples; i++){
+            if (audioBuffer[i] > threshold){
+                return false;
+            }
+        }
+        return true;
     }
 
     public File saveAsWav(File file) throws IOException {
