@@ -10,7 +10,6 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.SystemClock;
 import android.util.Log;
 
 import java.io.File;
@@ -51,13 +50,8 @@ public class Recorder {
         new Thread( ()-> {
             initRecorder();
             isRecording = true;
-            if (doRecording() != 0){
-
-            };
-            audioData = new short[audioDataList.size()];
-            for (int i = 0; i < frame_length_samples; i++){
-                audioData[i] = audioDataList.get(i);
-            }
+            doRecording();
+            audioData = listToShortArray(audioDataList);
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(()-> {
                 IRecordingDone.onRecordingDone(audioData);
@@ -67,9 +61,6 @@ public class Recorder {
 
     public void stop() {
         isRecording = false;
-        audioRecord.stop();
-        audioRecord.release();
-        audioRecord = null;
     }
 
     private void initRecorder() {
@@ -88,7 +79,7 @@ public class Recorder {
         //audioData = new short[nSamples];
     }
 
-    private boolean doRecording() {
+    private void doRecording() {
         Log.i(TAG, "doRecording");
 
         int read = 0;
@@ -104,8 +95,11 @@ public class Recorder {
         long start_time = System.currentTimeMillis();
 
         while (isRecording) {
-            if (System.currentTimeMillis() - start_time >= 1000 * max_recordingLength_inSec){
-                return;
+            if (System.currentTimeMillis() - start_time >= 1000L * max_recordingLength_inSec){
+                break;
+            }
+            if (audioRecord == null){
+                break;
             }
             read = audioRecord.read(buffer, 0, frame_length_samples);
             if (read > 0){
@@ -121,8 +115,7 @@ public class Recorder {
                 }
             }
         }
-
-
+        stop();
     }
 
     private boolean isSilent(short[] audioBuffer, int nBufferSamples, int threshold){
@@ -153,6 +146,15 @@ public class Recorder {
         }
         return bytes;
     }
+
+    private short[] listToShortArray(List<Short> list) {
+        short[] result = new short[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            result[i] = list.get(i);
+        }
+        return result;
+    }
+
 
     private void writeWavHeader(OutputStream out, int audioLength, int sampleRate, short channels, short bitsPerSample) throws IOException {
         int byteRate = sampleRate * channels * bitsPerSample / 8;

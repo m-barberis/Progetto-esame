@@ -50,10 +50,6 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
         bttStop.setOnClickListener( (v) -> {
             shouldRecordingKeepGoing = false;
             recorder.stop();
-            bttRecord.setEnabled(true);
-            bttStop.setEnabled(false);
-            chronometer.stop();
-            //chronometer.setText("00:00");
         } );
     }
 
@@ -69,5 +65,13 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
         //TODO
         //wavFile = recorder.saveAsWav(new File(getExternalFilesDir(null), "recorded.wav"));
         mfccMatrix = mfcc_extractor.extractMFCC(audioData);
+        resetWidgets();
+        tvSpeaker.setText("Done with everything");
+    }
+
+    private void resetWidgets(){
+        bttRecord.setEnabled(true);
+        bttStop.setEnabled(false);
+        chronometer.stop();
     }
 }
