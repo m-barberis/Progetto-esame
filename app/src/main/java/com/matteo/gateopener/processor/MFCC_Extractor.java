@@ -3,12 +3,8 @@ package com.matteo.gateopener.processor;
 import java.util.ArrayList;
 import java.util.List;
 
-import be.tarsos.dsp.AudioEvent;
-import be.tarsos.dsp.io.TarsosDSPAudioFormat;
-import be.tarsos.dsp.mfcc.MFCC;
-
 public class MFCC_Extractor {
-
+    private Processor processor;
     private int SAMPLE_RATE;
     private int FRAME_SIZE = 400; // 25 ms a 16khz
     private int HOP_SIZE = 160;   // 10 ms
@@ -19,6 +15,7 @@ public class MFCC_Extractor {
         this.FRAME_SIZE = frame_size;
         this.HOP_SIZE = hop_size;
         this.MFCC_COUNT = mfcc_count;
+        this.processor = new Processor(sample_rate);
     }
 
     /**
@@ -35,7 +32,7 @@ public class MFCC_Extractor {
         // Conversione in float [-1.0, 1.0]
         float[] floatData = new float[audioData.length];
         for (int i = 0; i < audioData.length; i++) {
-            floatData[i] = audioData[i] / 32768.0f;
+            floatData[i] = audioData[i];
         }
 
         return computeMFCC(floatData);
@@ -47,26 +44,23 @@ public class MFCC_Extractor {
      * @param audio Array di campioni normalizzati (float tra -1.0 e 1.0)
      * @return Matrice MFCC [frame][coefficiente]
      */
-    private float[][] computeMFCC(float[] audio) {
-        MFCC mfcc = new MFCC(FRAME_SIZE, SAMPLE_RATE, MFCC_COUNT, 40, 300, SAMPLE_RATE / 2);
-        List<float[]> mfccList = new ArrayList<>();
-        TarsosDSPAudioFormat format = new TarsosDSPAudioFormat(SAMPLE_RATE, 16, 1, true, false);
-
+    private float[][] computeMFCC(short[] audio) {
+        List<double[]> mfccList = new ArrayList<>();
         for (int start = 0; start + FRAME_SIZE <= audio.length; start += HOP_SIZE) {
-            float[] frame = new float[FRAME_SIZE];
+            short[] frame = new short[FRAME_SIZE];
             System.arraycopy(audio, start, frame, 0, FRAME_SIZE);
-
-            // Crea un AudioEvent a partire dal frame
-            AudioEvent audioEvent = new AudioEvent(format);
-            audioEvent.setFloatBuffer(frame);
-
-            mfcc.process(audioEvent);
-            float[] mfccs = mfcc.getMFCC();
+            double[] mfccs = computePowerSpectrum(frame);
             if (mfccs != null) {
                 mfccList.add(mfccs.clone());
             }
         }
 
         return mfccList.toArray(new float[0][MFCC_COUNT]);
+    }
+
+    private double[] computePowerSpectrum(short[] frame){
+        processor.run(frame);
+        double[] fft = processor.getSpectrum();
+        return fft;
     }
 }

@@ -75,7 +75,7 @@ public class Recorder {
                 samplingRate_inHz,
                 AudioFormat.CHANNEL_IN_MONO,
                 AudioFormat.ENCODING_PCM_16BIT,
-                2*frame_length_samples);
+                AudioRecord.getMinBufferSize(samplingRate_inHz, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT));
         //audioData = new short[nSamples];
     }
 
@@ -84,7 +84,7 @@ public class Recorder {
 
         int read = 0;
 
-        boolean hasStarted = false;
+        boolean hasStarted = false;//Every microphone needs time to "warm up"
 
         int bufferSize = AudioRecord.getMinBufferSize(samplingRate_inHz, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 
@@ -95,23 +95,18 @@ public class Recorder {
         long start_time = System.currentTimeMillis();
 
         while (isRecording) {
-            if (System.currentTimeMillis() - start_time >= 1000L * max_recordingLength_inSec){
+            if (System.currentTimeMillis() - start_time >= 1000L * max_recordingLength_inSec || audioRecord == null){
                 break;
             }
-            if (audioRecord == null){
-                break;
-            }
-            read = audioRecord.read(buffer, 0, frame_length_samples);
-            if (read > 0){
+            if (audioRecord.read(buffer, 0, frame_length_samples) > 0){
                 if (hasStarted){
                     for (int i = 0; i < frame_length_samples; i++){
                         audioDataList.add(buffer[i]);
                     }
-                }
-                else {
-                    if (!isSilent(buffer, silenceThreshold, frame_length_samples)){
-                        hasStarted = true;
-                    }
+                    continue;
+                }// if !hasStarted => Check if buffer is no longer silent
+                if (!isSilent(buffer, silenceThreshold, frame_length_samples)){
+                    hasStarted = true;
                 }
             }
         }
