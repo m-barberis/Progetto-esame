@@ -29,19 +29,12 @@ public class MFCC_Extractor {
             return new float[0][MFCC_COUNT];
         }
 
-        // Conversione in float [-1.0, 1.0]
-        float[] floatData = new float[audioData.length];
-        for (int i = 0; i < audioData.length; i++) {
-            floatData[i] = audioData[i];
-        }
-
-        return computeMFCC(floatData);
+        return computeMFCC(audioData);
     }
 
     /**
      * Divide il segnale in frame e calcola i MFCC per ciascun frame.
      *
-     * @param audio Array di campioni normalizzati (float tra -1.0 e 1.0)
      * @return Matrice MFCC [frame][coefficiente]
      */
     private float[][] computeMFCC(short[] audio) {
