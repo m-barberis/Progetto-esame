@@ -1,21 +1,28 @@
 package com.matteo.gateopener.processor;
 
+import android.util.Log;
+
+import com.matteo.gateopener.misc.Constants;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class MFCC_Extractor {
+    private final String TAG = "MFCC_Extractor";
     private Processor processor;
     private int SAMPLE_RATE;
     private int FRAME_SIZE = 400; // 25 ms a 16kHz
     private int HOP_SIZE = 160;   // 10 ms
     private int MFCC_COUNT = 13;
-
+    private int melFilterCount = Constants.MEL_FILTER_COUNT;
+    private MelFilterBank melFilterBank;
     public MFCC_Extractor(int sample_rate, int frame_size, int hop_size, int mfcc_count) {
         this.SAMPLE_RATE = sample_rate;
         this.FRAME_SIZE = frame_size;
         this.HOP_SIZE = hop_size;
         this.MFCC_COUNT = mfcc_count;
         this.processor = new Processor(sample_rate);
+        //this.melFilterBank = new MelFilterBank();
     }
 
     /**
@@ -39,16 +46,35 @@ public class MFCC_Extractor {
      */
     private double[][] computeMFCC(short[] audio) {
         List<double[]> mfccList = new ArrayList<>();
+        float[] f = generateFrequencyArray(257, SAMPLE_RATE);
         for (int start = 0; start + FRAME_SIZE <= audio.length; start += HOP_SIZE) {
-            short[] frame = new short[FRAME_SIZE];
+            short[] frame = new short[512];
+            double[] filterBankEnergies = new double[melFilterCount];
             System.arraycopy(audio, start, frame, 0, FRAME_SIZE);
-            double[] mfccs = computePowerSpectrum(frame);
-            if (mfccs != null) {
-                mfccList.add(mfccs.clone());
+            double[] powerSpectrum = computePowerSpectrum(frame);
+            List<float[]> melFilterBank = MelFilterBank.computeFilters(melFilterCount, 0, SAMPLE_RATE / 2, f);
+            for (int i = 0; i < melFilterCount; i++){
+                float[] melFilter = melFilterBank.get(i);
+                for (int x = 0; x < 256; x++){
+                    filterBankEnergies[i] += powerSpectrum[x] * melFilter[x];
+                }
+                filterBankEnergies[i] = Math.log(filterBankEnergies[i]);
+            }
+            double[] mfcc = DCT.computeDCT(filterBankEnergies, 13);
+            if (mfcc != null) {
+                mfccList.add(mfcc.clone());
             }
         }
 
         return mfccList.toArray(new double[0][MFCC_COUNT]);
+    }
+
+    private float[] generateFrequencyArray(int FRAME_SIZE, int AUDIO_SAMPLING_FREQUENCY) {
+        float[] f = new float[FRAME_SIZE];
+        for (int i = 0; i < FRAME_SIZE; i++){
+            f[i] = (AUDIO_SAMPLING_FREQUENCY / (2 * (FRAME_SIZE - 1))) * i;
+        }
+        return f;
     }
 
     private double[] computePowerSpectrum(short[] frame){
@@ -56,4 +82,5 @@ public class MFCC_Extractor {
         double[] fft = processor.getSpectrum();
         return fft;
     }
+
 }

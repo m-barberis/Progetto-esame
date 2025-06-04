@@ -64,11 +64,11 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
     public void onRecordingDone(short[] audioData) {
         short[] y = new short[400];
         for (int i = 0; i < 400; i++){
-            y[i] = (short)i;
+            y[i] = (short)(400 - i);
         }
         //TODO
         //wavFile = recorder.saveAsWav(new File(getExternalFilesDir(null), "recorded.wav"));
-        mfccMatrix = mfcc_extractor.extractMFCC(audioData);
+        //mfccMatrix = mfcc_extractor.extractMFCC(audioData);
         resetWidgets();
         double[][] testdata = mfcc_extractor.extractMFCC(y);
         tvSpeaker.setText(testdata.toString());

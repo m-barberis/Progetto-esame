@@ -30,7 +30,7 @@ public class MelFilterBank {
      * @param f Array of discrete frequencies.
      * @return Array of filter indexes (size: nFilter + 2)
      */
-    public static int[] computeMelFiltersIndexes(int nFilter, double firstFreq, double lastFreq, float[] f) {
+    private static int[] computeMelFiltersIndexes(int nFilter, double firstFreq, double lastFreq, float[] f) {
         int nPoints = nFilter + 2;
 
         double firstMel = fromHzToMel(firstFreq);
@@ -75,15 +75,10 @@ public class MelFilterBank {
         return f.length - 1;
     }
 
-    /**
-     * Compute the MEL filters as arrays of filter values.
-     * Each filter is stored as a float array with its shape.
-     * @param filterIndexes Filter indexes computed from computeMelFiltersIndexes.
-     * @param f Frequency array.
-     * @return List of filter shapes, each as a float[].
-     */
-    public static List<float[]> computeFilters(int[] filterIndexes, float[] f) {
+    public static List<float[]> computeFilters(int nFilter, double firstFreq, double lastFreq, float[] f) {
+        int[] filterIndexes = computeMelFiltersIndexes(nFilter, firstFreq, lastFreq, f);
         int nFilters = filterIndexes.length - 2;
+        int fftSize = f.length;
         List<float[]> melFilters = new ArrayList<>();
 
         for (int i = 0; i < nFilters; i++) {
@@ -91,29 +86,23 @@ public class MelFilterBank {
             int f_m = filterIndexes[i + 1];
             int f_m_p1 = filterIndexes[i + 2];
 
+            float[] filter = new float[fftSize]; // Full-length filter initialized with zeros
+
             // Rising slope
-            int nRaise = f_m - f_m_m1 + 1;
-            float[] fRaise = new float[nRaise];
-            for (int k = 0; k < nRaise; k++) {
-                fRaise[k] = (float) k / (float) (f_m - f_m_m1);
+            for (int k = f_m_m1; k < f_m; k++) {
+                filter[k] = (float) (k - f_m_m1) / (f_m - f_m_m1);
             }
 
             // Falling slope
-            int nFall = f_m_p1 - f_m;
-            float[] fFall = new float[nFall];
-            for (int k = 1; k <= nFall; k++) {
-                fFall[k - 1] = (float) (f_m_p1 - (f_m + k)) / (float) (f_m_p1 - f_m);
+            for (int k = f_m; k < f_m_p1; k++) {
+                filter[k] = (float) (f_m_p1 - k) / (f_m_p1 - f_m);
             }
 
-            // Concatenate
-            float[] singleFilterValues = new float[fRaise.length + fFall.length];
-            System.arraycopy(fRaise, 0, singleFilterValues, 0, fRaise.length);
-            System.arraycopy(fFall, 0, singleFilterValues, fRaise.length, fFall.length);
-
-            melFilters.add(singleFilterValues);
+            melFilters.add(filter);
         }
 
         return melFilters;
     }
+
 
 }
