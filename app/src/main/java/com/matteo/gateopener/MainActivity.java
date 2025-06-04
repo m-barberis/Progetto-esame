@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
     private MFCC_Extractor mfcc_extractor;
     private boolean shouldRecordingKeepGoing = false;
     //private File wavFile;
-    float[][] mfccMatrix;
+    double[][] mfccMatrix;
     private final int FS = 16000; //da cambiare
 
 
@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
         //wavFile = recorder.saveAsWav(new File(getExternalFilesDir(null), "recorded.wav"));
         mfccMatrix = mfcc_extractor.extractMFCC(audioData);
         resetWidgets();
-        float[][] testdata = mfcc_extractor.extractMFCC(y);
+        double[][] testdata = mfcc_extractor.extractMFCC(y);
         tvSpeaker.setText(testdata.toString());
     }
 

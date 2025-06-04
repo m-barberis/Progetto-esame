@@ -6,7 +6,7 @@ import java.util.List;
 public class MFCC_Extractor {
     private Processor processor;
     private int SAMPLE_RATE;
-    private int FRAME_SIZE = 400; // 25 ms a 16khz
+    private int FRAME_SIZE = 400; // 25 ms a 16kHz
     private int HOP_SIZE = 160;   // 10 ms
     private int MFCC_COUNT = 13;
 
@@ -24,9 +24,9 @@ public class MFCC_Extractor {
      * @param audioData Array di campioni audio in formato short (PCM 16-bit mono)
      * @return Matrice MFCC [frame][coefficiente]
      */
-    public float[][] extractMFCC(short[] audioData) {
+    public double[][] extractMFCC(short[] audioData) {
         if (audioData == null || audioData.length < FRAME_SIZE) {
-            return new float[0][MFCC_COUNT];
+            return new double[0][MFCC_COUNT];
         }
 
         return computeMFCC(audioData);
@@ -37,7 +37,7 @@ public class MFCC_Extractor {
      *
      * @return Matrice MFCC [frame][coefficiente]
      */
-    private float[][] computeMFCC(short[] audio) {
+    private double[][] computeMFCC(short[] audio) {
         List<double[]> mfccList = new ArrayList<>();
         for (int start = 0; start + FRAME_SIZE <= audio.length; start += HOP_SIZE) {
             short[] frame = new short[FRAME_SIZE];
@@ -48,7 +48,7 @@ public class MFCC_Extractor {
             }
         }
 
-        return mfccList.toArray(new float[0][MFCC_COUNT]);
+        return mfccList.toArray(new double[0][MFCC_COUNT]);
     }
 
     private double[] computePowerSpectrum(short[] frame){
