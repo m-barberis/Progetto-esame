@@ -1,4 +1,4 @@
-package com.matteo.gateopener.processor;
+package com.matteo.gateopener.mfcc;
 
 public class DCT {
 

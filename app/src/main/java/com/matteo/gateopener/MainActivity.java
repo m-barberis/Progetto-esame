@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.matteo.gateopener.interfaces.IRecordingDone;
 import com.matteo.gateopener.misc.Constants;
-import com.matteo.gateopener.processor.MFCC_Extractor;
+import com.matteo.gateopener.mfcc.MFCC_Extractor;
 import com.matteo.gateopener.recorder.Recorder;
 
 public class MainActivity extends AppCompatActivity implements IRecordingDone {
