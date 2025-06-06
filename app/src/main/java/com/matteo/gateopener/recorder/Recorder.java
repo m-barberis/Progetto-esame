@@ -122,57 +122,12 @@ public class Recorder {
         return true;
     }
 
-    public File saveAsWav(File file) throws IOException {
-        byte[] byteData = shortToByte(audioData);
-        int byteRate = samplingRate_inHz * 2;
-
-        try (FileOutputStream out = new FileOutputStream(file)) {
-            writeWavHeader(out, audioData.length * 2, samplingRate_inHz, (short) 1, (short) 16);
-            out.write(byteData);
-        }
-        return file;
-    }
-
-    private byte[] shortToByte(short[] data) {
-        byte[] bytes = new byte[data.length * 2];
-        for (int i = 0; i < data.length; i++) {
-            bytes[i * 2] = (byte) (data[i] & 0xFF);
-            bytes[i * 2 + 1] = (byte) ((data[i] >> 8) & 0xFF);
-        }
-        return bytes;
-    }
-
     private short[] listToShortArray(List<Short> list) {
         short[] result = new short[list.size()];
         for (int i = 0; i < list.size(); i++) {
             result[i] = list.get(i);
         }
         return result;
-    }
-
-
-    private void writeWavHeader(OutputStream out, int audioLength, int sampleRate, short channels, short bitsPerSample) throws IOException {
-        int byteRate = sampleRate * channels * bitsPerSample / 8;
-        int blockAlign = channels * bitsPerSample / 8;
-        int chunkSize = 36 + audioLength;
-
-        DataOutputStream dos = new DataOutputStream(out);
-
-        dos.writeBytes("RIFF");
-        dos.writeInt(Integer.reverseBytes(chunkSize));
-        dos.writeBytes("WAVE");
-
-        dos.writeBytes("fmt ");
-        dos.writeInt(Integer.reverseBytes(16));
-        dos.writeShort(Short.reverseBytes((short) 1));
-        dos.writeShort(Short.reverseBytes(channels));
-        dos.writeInt(Integer.reverseBytes(sampleRate));
-        dos.writeInt(Integer.reverseBytes(byteRate));
-        dos.writeShort(Short.reverseBytes((short) blockAlign));
-        dos.writeShort(Short.reverseBytes(bitsPerSample));
-
-        dos.writeBytes("data");
-        dos.writeInt(Integer.reverseBytes(audioLength));
     }
 
 }

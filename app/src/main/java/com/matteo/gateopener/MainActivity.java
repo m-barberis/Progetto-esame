@@ -67,7 +67,6 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
             y[i] = (short)i;
         }
         //TODO
-        //wavFile = recorder.saveAsWav(new File(getExternalFilesDir(null), "recorded.wav"));
         //mfccMatrix = mfcc_extractor.extractMFCC(audioData);
         resetWidgets();
         double[][] testdata = mfcc_extractor.extractMFCC(y);
