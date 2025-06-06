@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
     public void onRecordingDone(short[] audioData) {
         short[] y = new short[400];
         for (int i = 0; i < 400; i++){
-            y[i] = (short)(400 - i);
+            y[i] = (short)i;
         }
         //TODO
         //wavFile = recorder.saveAsWav(new File(getExternalFilesDir(null), "recorded.wav"));
