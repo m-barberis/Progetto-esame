@@ -26,7 +26,7 @@ public class MFCC_Extractor {
         this.processor = new Processor(sample_rate);
         this.audioFramer = new Audio_Framer(frame_size, hop_size);
 
-        frequencyArray = generateFrequencyArray(FRAME_SIZE, SAMPLE_RATE); //TODO da capire bene perchè 257!! (frame size prima era 257 = 512/2 +1)
+        frequencyArray = generateFrequencyArray(FRAME_SIZE / 2, SAMPLE_RATE); //Array delle frequenze del power spectrum
 
     }
 
@@ -42,12 +42,11 @@ public class MFCC_Extractor {
         }
         prepareData(audioData);
         List<double[]> mfccList = new ArrayList<>();
+        int frameCount = frames.length;
 
-        for (int start = 0; start + FRAME_SIZE <= frames.length; start += FRAME_SIZE) {
-            short[] currentFrame = new short[FRAME_SIZE];
-            System.arraycopy(frames, start, currentFrame, 0, FRAME_SIZE); //estraggo currentFrame dalla matrice di frames
-            double[] frame_mfcc = computeFrameMFCC(currentFrame, frequencyArray);
+        for (int i = 0; i < frameCount; i++) {
 
+            double[] frame_mfcc = computeFrameMFCC(frames[i], frequencyArray);
             mfccList.add(frame_mfcc.clone());
         }
         return mfccList.toArray(new double[0][MFCC_COUNT]);

@@ -67,10 +67,10 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
             y[i] = (short)i;
         }
         //TODO
-        //mfccMatrix = mfcc_extractor.extractMFCC(audioData);
+        mfccMatrix = mfcc_extractor.extractMFCC(audioData);
         resetWidgets();
-        double[][] testdata = mfcc_extractor.extractMFCC(y);
-        tvSpeaker.setText(testdata.toString());
+        //double[][] testdata = mfcc_extractor.extractMFCC(y);
+        //tvSpeaker.setText(testdata.toString());
     }
 
     private void resetWidgets(){

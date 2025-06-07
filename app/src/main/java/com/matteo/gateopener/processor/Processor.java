@@ -122,6 +122,7 @@ public class Processor {
 
 
     private double abs(double re, double im) {
+
         return Math.sqrt(re*re + im*im);
     }
 }
