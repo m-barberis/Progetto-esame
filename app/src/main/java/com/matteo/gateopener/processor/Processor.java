@@ -76,7 +76,6 @@ public class Processor {
         for (int i = 1; i < spectrumLength-1; i++) {
             spectrum[i] = fftAbs[i] * 2;
         }
-        //spectrum[spectrumLength] = fftAbs[spectrumLength];
     }
 
     private void AbsSquared() {

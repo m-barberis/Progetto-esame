@@ -19,8 +19,14 @@ public class DCT {
                 sum += melCoefficients[n] * Math.cos(Math.PI * k * (2 * n + 1) / (2.0 * N));
             }
             // Optional normalization (common in MFCC computation)
-            mfccs[k] = sum * Math.sqrt(2.0 / N);
+            if (k != 0){
+                mfccs[k] = sum * Math.sqrt(2.0 / N);
+            }
+            else {
+                mfccs[k] = sum * Math.sqrt(1.0 / N);
+            }
         }
+
 
         return mfccs;
     }

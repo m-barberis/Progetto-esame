@@ -107,7 +107,7 @@ public class Recorder {
                 }// if !hasStarted => Check if buffer is no longer silent
                 if (!isSilent(buffer, silenceThreshold, frame_length_samples)){
                     hasStarted = true;
-                }
+                }// Aspettare T prima di registrare invece che usare soglia
             }
         }
         stop();
