@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.matteo.gateopener.audio_framing.Audio_Framer;
 import com.matteo.gateopener.fastdtw.dtw.FastDTW;
 import com.matteo.gateopener.fastdtw.timeseries.TimeSeries;
 import com.matteo.gateopener.fastdtw.util.DistanceFunction;
@@ -26,13 +27,13 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
     private TextView tvSpeaker;
     private Chronometer chronometer;
     private Recorder recorder;
+    private Audio_Framer audioFramer;
     private MFCC_Extractor mfcc_extractor;
     private FastDTW fastDTW;
     private TimeSeries tsTest1, tsTest2;
     private DistanceFunction distanceFunction;
     private boolean shouldRecordingKeepGoing = false;
     double[][] mfccMatrix;
-    private final int FS = 16000; //da cambiare
 
 
 
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
 
         initViews();
         recorder = new Recorder(this, Constants.AUDIO_SAMPLING_FREQUENCY, Constants.MAX_RECORDING_TIME_S, Constants.DEFAULT_SILENCE_THRESHOLD, Constants.FRAME_LENGTH_SAMPLES);
+        audioFramer = new Audio_Framer(Constants.FRAME_SIZE, Constants.FRAME_HOP_SIZE);
         mfcc_extractor = new MFCC_Extractor(Constants.AUDIO_SAMPLING_FREQUENCY, Constants.FRAME_SIZE, Constants.FRAME_HOP_SIZE, Constants.MFCC_COUNT);
         fastDTW = new FastDTW();
         distanceFunction = new EuclideanDistance();
@@ -74,11 +76,14 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
     @Override
     public void onRecordingDone(short[] audioData) {
 
-        //TODO Test per DTW
+        //Test per DTW
         testDTW();
 
-        //TODO Test per MFCC
+        //Test per MFCC
         testMFCC();
+
+        //MFCC di dati reali
+        //mfccMatrix = mfcc_extractor.extractMFCC(audioData);
 
         resetWidgets();
 
