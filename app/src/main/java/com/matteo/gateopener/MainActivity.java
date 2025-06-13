@@ -1,4 +1,4 @@
-package com.matteo.gateopener;
+package com.matteo.gateopener; //ciao
 
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -12,6 +12,12 @@ import com.matteo.gateopener.interfaces.IRecordingDone;
 import com.matteo.gateopener.misc.Constants;
 import com.matteo.gateopener.mfcc.MFCC_Extractor;
 import com.matteo.gateopener.recorder.Recorder;
+
+//import fastdtw.dtw.FastDTW;
+//import fastdtw.timeseries.DoubleTimeSeries;
+//import fastdtw.timeseries.TimeSeries;
+//import fastdtw.util.EuclideanDistance;
+//import fastdtw.util.DistanceFunction;
 
 public class MainActivity extends AppCompatActivity implements IRecordingDone {
     private final String TAG = "MainActivity";
