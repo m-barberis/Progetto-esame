@@ -1,4 +1,4 @@
-package com.matteo.gateopener; //ciao
+package com.matteo.gateopener;
 
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -20,12 +20,6 @@ import com.matteo.gateopener.recorder.Recorder;
 import java.util.ArrayList;
 import java.util.List;
 
-//import fastdtw.dtw.FastDTW;
-//import fastdtw.timeseries.DoubleTimeSeries;
-//import fastdtw.timeseries.TimeSeries;
-//import fastdtw.util.EuclideanDistance;
-//import fastdtw.util.DistanceFunction;
-
 public class MainActivity extends AppCompatActivity implements IRecordingDone {
     private final String TAG = "MainActivity";
     private Button bttRecord, bttStop;
@@ -37,7 +31,6 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
     private TimeSeries tsTest1, tsTest2;
     private DistanceFunction distanceFunction;
     private boolean shouldRecordingKeepGoing = false;
-    //private File wavFile;
     double[][] mfccMatrix;
     private final int FS = 16000; //da cambiare
 
@@ -80,15 +73,28 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
 
     @Override
     public void onRecordingDone(short[] audioData) {
-        short[] y = new short[400];
-        for (int i = 0; i < 400; i++){
-            y[i] = (short)i;
-        }
-        //Test per DTW
+
+        //TODO Test per DTW
+        testDTW();
+
+        //TODO Test per MFCC
+        testMFCC();
+
+        resetWidgets();
+
+    }
+
+    private void resetWidgets(){
+        bttRecord.setEnabled(true);
+        bttStop.setEnabled(false);
+        chronometer.stop();
+    }
+
+    private void testDTW() {
         List<double[]> xlist1 = new ArrayList<>();
         double[] x = new double[200];
         for (int i = 0; i < 200; i++) {
-            x[i] = (double) i;
+            x[i] = i;
         }
         xlist1.add(x.clone());
         List<double[]> xlist2 = new ArrayList<>();
@@ -101,21 +107,13 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
         tsTest1 = new TimeSeries(xlist1);
         tsTest2 = new TimeSeries(xlist2);
         distance = FastDTW.getWarpDistance(tsTest1, tsTest2, distanceFunction);
+    }
 
-        //TODO
+    private void testMFCC() {
+        short[] y = new short[400];
+        for (int i = 0; i < 400; i++){
+            y[i] = (short)i;
+        }
         mfccMatrix = mfcc_extractor.extractMFCC(y);
-        resetWidgets();
-        //double[][] testdata = mfcc_extractor.extractMFCC(y);
-        //tvSpeaker.setText(testdata.toString());
-    }
-
-    private void resetWidgets(){
-        bttRecord.setEnabled(true);
-        bttStop.setEnabled(false);
-        chronometer.stop();
-    }
-
-    private void testDTW() {
-
     }
 }
