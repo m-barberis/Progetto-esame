@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.matteo.gateopener.fastdtw.dtw.FastDTW;
 import com.matteo.gateopener.fastdtw.timeseries.TimeSeries;
 import com.matteo.gateopener.fastdtw.util.DistanceFunction;
+import com.matteo.gateopener.fastdtw.util.EuclideanDistance;
 import com.matteo.gateopener.interfaces.IRecordingDone;
 import com.matteo.gateopener.misc.Constants;
 import com.matteo.gateopener.mfcc.MFCC_Extractor;
@@ -52,17 +53,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
         recorder = new Recorder(this, Constants.AUDIO_SAMPLING_FREQUENCY, Constants.MAX_RECORDING_TIME_S, Constants.DEFAULT_SILENCE_THRESHOLD, Constants.FRAME_LENGTH_SAMPLES);
         mfcc_extractor = new MFCC_Extractor(Constants.AUDIO_SAMPLING_FREQUENCY, Constants.FRAME_SIZE, Constants.FRAME_HOP_SIZE, Constants.MFCC_COUNT);
         fastDTW = new FastDTW();
-        distanceFunction = new DistanceFunction() {
-            @Override
-            public double distance(double[] a, double[] b) {
-                double sum = 0;
-                for (int i = 0; i < a.length; i++) {
-                    double d = a[i] - b[i];
-                    sum += d * d;
-                }
-                return Math.sqrt(sum);
-            }
-        };
+        distanceFunction = new EuclideanDistance();
 
 
         bttRecord.setOnClickListener( (v) -> {
