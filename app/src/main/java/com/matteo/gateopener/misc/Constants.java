@@ -1,9 +1,9 @@
 package com.matteo.gateopener.misc;
 
 public class Constants {
-    public static final int AUDIO_SAMPLING_FREQUENCY = 8000;//scendere a 8kHz
-    public static final int FRAME_SIZE = 400;  // frame da 25 ms
-    public static final int FRAME_HOP_SIZE = 160;    // sovrapposizione tra frame (ogni frame inizia 10 ms dopo quello prima)
+    public static final int AUDIO_SAMPLING_FREQUENCY = 8000; //campioniamo a 8 kHz
+    public static final int FRAME_SIZE = 200;  // frame da 25 ms
+    public static final int FRAME_HOP_SIZE = 80;    // sovrapposizione tra frame (ogni frame inizia 10 ms dopo quello prima)
     public static final int MFCC_COUNT = 13;
     public static final int MEL_FILTER_COUNT = 26;
     public static final int DEFAULT_SILENCE_THRESHOLD = 100;
