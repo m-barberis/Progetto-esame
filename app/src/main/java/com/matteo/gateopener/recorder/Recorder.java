@@ -28,6 +28,7 @@ public class Recorder {
     private int samplingRate_inHz;
     private int max_recordingLength_inSec;
     private short[] audioData;
+    private int wait_time_before_recording_ms;
 
     int silenceThreshold;
     private volatile boolean isRecording = false;
@@ -36,12 +37,13 @@ public class Recorder {
     private IRecordingDone IRecordingDone;
     private int frame_length_samples;
 
-    public Recorder(Context context, int samplingRate_inHz, int max_recordingLength_inSec, int silenceThreshold, int frame_length_samples) {
+    public Recorder(Context context, int samplingRate_inHz, int max_recordingLength_inSec, int silenceThreshold, int frame_length_samples, int wait_time_before_recording_ms) {
         this.context = context;
         this.samplingRate_inHz = samplingRate_inHz;
         this.max_recordingLength_inSec = max_recordingLength_inSec;
         this.silenceThreshold = silenceThreshold;
         this.frame_length_samples = frame_length_samples;
+        this.wait_time_before_recording_ms = wait_time_before_recording_ms;
 
         IRecordingDone = (IRecordingDone) context;
     }
@@ -98,28 +100,16 @@ public class Recorder {
             if (System.currentTimeMillis() - start_time >= 1000L * max_recordingLength_inSec || audioRecord == null){
                 break;
             }
-            if (audioRecord.read(buffer, 0, frame_length_samples) > 0){
-                if (hasStarted){
-                    for (int i = 0; i < frame_length_samples; i++){
-                        audioDataList.add(buffer[i]);
-                    }
-                    continue;
-                }// if !hasStarted => Check if buffer is no longer silent
-                if (!isSilent(buffer, silenceThreshold, frame_length_samples)){
-                    hasStarted = true;
-                }// Aspettare T prima di registrare invece che usare soglia
+            if (System.currentTimeMillis() - start_time < wait_time_before_recording_ms){
+                continue;
+            }
+            if (audioRecord.read(buffer, 0, frame_length_samples) > 0) {
+                for (int i = 0; i < frame_length_samples; i++) {
+                    audioDataList.add(buffer[i]);
+                }
             }
         }
         stop();
-    }
-
-    private boolean isSilent(short[] audioBuffer, int nBufferSamples, int threshold){
-        for (int i = 0; i < nBufferSamples; i++){
-            if (audioBuffer[i] > threshold){
-                return false;
-            }
-        }
-        return true;
     }
 
     private short[] listToShortArray(List<Short> list) {

@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.matteo.gateopener.classifier.MFCC_Classifier;
 import com.matteo.gateopener.interfaces.IRecordingDone;
 import com.matteo.gateopener.misc.Constants;
 import com.matteo.gateopener.mfcc.MFCC_Extractor;
@@ -20,10 +21,13 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
     private Chronometer chronometer;
     private Recorder recorder;
     private MFCC_Extractor mfcc_extractor;
+    private MFCC_Classifier mfcc_classifier;
+    private int[] results;
+    private int topResult = 0;
     private boolean shouldRecordingKeepGoing = false;
     //private File wavFile;
     double[][] mfccMatrix;
-    private final int FS = 16000; //da cambiare
+    private final int FS = Constants.AUDIO_SAMPLING_FREQUENCY; //da cambiare
 
 
 
@@ -34,9 +38,10 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
         setContentView(R.layout.activity_main);
 
         initViews();
-        recorder = new Recorder(this, Constants.AUDIO_SAMPLING_FREQUENCY, Constants.MAX_RECORDING_TIME_S, Constants.DEFAULT_SILENCE_THRESHOLD, Constants.FRAME_LENGTH_SAMPLES);
+        recorder = new Recorder(this, Constants.AUDIO_SAMPLING_FREQUENCY, Constants.MAX_RECORDING_TIME_S, Constants.DEFAULT_SILENCE_THRESHOLD, Constants.FRAME_LENGTH_SAMPLES, Constants.WAIT_TIME_BEFORE_RECORDING_MS);
         mfcc_extractor = new MFCC_Extractor(Constants.AUDIO_SAMPLING_FREQUENCY, Constants.FRAME_SIZE, Constants.FRAME_HOP_SIZE, Constants.MFCC_COUNT);
-
+        mfcc_classifier = new MFCC_Classifier(Constants.MFCC_COUNT, Constants.NUM_PEOPLE_TO_CLASSIFY);
+        results = new int[Constants.NUM_PEOPLE_TO_CLASSIFY];
 
         bttRecord.setOnClickListener( (v) -> {
             shouldRecordingKeepGoing = true;
@@ -62,20 +67,32 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
 
     @Override
     public void onRecordingDone(short[] audioData) {
-        short[] y = new short[400];
-        for (int i = 0; i < 400; i++){
-            y[i] = (short)i;
-        }
-        //TODO
-        mfccMatrix = mfcc_extractor.extractMFCC(y);
+        mfccMatrix = mfcc_extractor.extractMFCC(audioData);
+        mfcc_classifier.classifyMFCCMatrix(mfccMatrix);
+        int[] results = mfcc_classifier.getResults();
+        topResult = mfcc_classifier.getTopResult();
         resetWidgets();
-        //double[][] testdata = mfcc_extractor.extractMFCC(y);
-        //tvSpeaker.setText(testdata.toString());
+        tvSpeaker.setText(resultToString(topResult));
     }
 
     private void resetWidgets(){
         bttRecord.setEnabled(true);
         bttStop.setEnabled(false);
         chronometer.stop();
+    }
+
+    private String resultToString(int result){
+        switch (result){
+            case 0:
+                return "Berto";
+            case 1:
+                return "Iazze";
+            case 2:
+                return "MatteBarba";
+            case 3:
+                return "MatteTornar";
+            default:
+                return "Invalid result";
+        }
     }
 }
