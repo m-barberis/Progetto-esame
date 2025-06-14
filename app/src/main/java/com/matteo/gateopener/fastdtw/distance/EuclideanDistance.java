@@ -1,4 +1,6 @@
-package com.matteo.gateopener.fastdtw.util;
+package com.matteo.gateopener.fastdtw.distance;
+
+import com.matteo.gateopener.interfaces.DistanceFunction;
 
 public class EuclideanDistance implements DistanceFunction {
     public double distance(double[] a, double[] b) {

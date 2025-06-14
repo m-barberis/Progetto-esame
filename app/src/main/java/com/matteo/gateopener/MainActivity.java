@@ -12,8 +12,8 @@ import com.matteo.gateopener.classifier.MFCC_Classifier;
 import com.matteo.gateopener.audio_framing.Audio_Framer;
 import com.matteo.gateopener.fastdtw.dtw.FastDTW;
 import com.matteo.gateopener.fastdtw.timeseries.TimeSeries;
-import com.matteo.gateopener.fastdtw.util.DistanceFunction;
-import com.matteo.gateopener.fastdtw.util.EuclideanDistance;
+import com.matteo.gateopener.interfaces.DistanceFunction;
+import com.matteo.gateopener.fastdtw.distance.EuclideanDistance;
 import com.matteo.gateopener.interfaces.IRecordingDone;
 import com.matteo.gateopener.misc.Constants;
 import com.matteo.gateopener.mfcc.MFCC_Extractor;
@@ -88,22 +88,35 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
         topResult = mfcc_classifier.getTopResult();
 
         //Test per DTW
-        testDTW();
+        //testDTW();
 
         //Test per MFCC
-        testMFCC();
+        //testMFCC();
 
         //MFCC di dati reali
         //mfccMatrix = mfcc_extractor.extractMFCC(audioData);
 
         resetWidgets();
         tvSpeaker.setText(resultToString(topResult));
+        resetData();
     }
 
     private void resetWidgets(){
         bttRecord.setEnabled(true);
         bttStop.setEnabled(false);
         chronometer.stop();
+    }
+
+    private void resetData() {
+        // Resetta i dati audio e MFCC
+        mfccMatrix = null;
+
+        // Resetta i risultati di classificazione
+        for (int i = 0; i < results.length; i++) {
+            results[i] = 0;
+        }
+        topResult = 0;
+        mfcc_classifier.reset();
     }
 
     private String resultToString(int result){

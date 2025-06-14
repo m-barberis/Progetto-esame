@@ -50,6 +50,9 @@ public class Recorder {
 
     public void start() {
         new Thread( ()-> {
+            audioDataList = new ArrayList<>();
+            audioData = null;
+
             initRecorder();
             isRecording = true;
             doRecording();
@@ -57,6 +60,8 @@ public class Recorder {
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(()-> {
                 IRecordingDone.onRecordingDone(audioData);
+                audioData = null;
+                audioDataList = null;
             });
         }).start();
     }
@@ -96,12 +101,18 @@ public class Recorder {
 
         long start_time = System.currentTimeMillis();
 
+        // WARM-UP: ignora i primi N frame
+        int warmupFrames = 2;
+        for (int i = 0; i < warmupFrames; i++) {
+            audioRecord.read(buffer, 0, frame_length_samples);
+        }
+
         while (isRecording) {
             if (System.currentTimeMillis() - start_time >= 1000L * max_recordingLength_inSec || audioRecord == null){
                 break;
             }
             if (System.currentTimeMillis() - start_time < wait_time_before_recording_ms){
-                continue;
+                continue; //TODO non funziona, audioData inizia sempre con 0
             }
             if (audioRecord.read(buffer, 0, frame_length_samples) > 0) {
                 for (int i = 0; i < frame_length_samples; i++) {
