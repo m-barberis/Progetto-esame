@@ -1,6 +1,7 @@
 package com.matteo.gateopener.recorder;
 
 import com.matteo.gateopener.interfaces.IRecordingDone;
+import com.matteo.gateopener.interfaces.IRecordingProgress;
 
 import android.Manifest;
 import android.content.Context;
@@ -26,38 +27,38 @@ public class Recorder {
     private final String TAG = "Recorder";
     private final Context context;
     private int samplingRate_inHz;
-    private int max_recordingLength_inSec;
+    private int max_recordingLength_ms;
     private short[] audioData;
-    private int wait_time_before_recording_ms;
 
     int silenceThreshold;
     private volatile boolean isRecording = false;
     private List<Short> audioDataList = new ArrayList<>();
     private AudioRecord audioRecord;
     private IRecordingDone IRecordingDone;
+    private IRecordingProgress IRecordingProgress;
     private int frame_length_samples;
 
-    public Recorder(Context context, int samplingRate_inHz, int max_recordingLength_inSec, int silenceThreshold, int frame_length_samples, int wait_time_before_recording_ms) {
+    public Recorder(Context context, int samplingRate_inHz, int max_recordingLength_ms, int frame_length_samples) {
         this.context = context;
         this.samplingRate_inHz = samplingRate_inHz;
-        this.max_recordingLength_inSec = max_recordingLength_inSec;
+        this.max_recordingLength_ms = max_recordingLength_ms;
         this.silenceThreshold = silenceThreshold;
         this.frame_length_samples = frame_length_samples;
-        this.wait_time_before_recording_ms = wait_time_before_recording_ms;
 
         IRecordingDone = (IRecordingDone) context;
+        IRecordingProgress = (IRecordingProgress) context;
     }
 
     public void start() {
         new Thread( ()-> {
             audioDataList = new ArrayList<>();
             audioData = null;
+            Handler handler = new Handler(Looper.getMainLooper());
 
             initRecorder();
             isRecording = true;
-            doRecording();
+            doRecording(handler);
             audioData = listToShortArray(audioDataList);
-            Handler handler = new Handler(Looper.getMainLooper());
             handler.post(()-> {
                 IRecordingDone.onRecordingDone(audioData);
                 audioData = null;
@@ -86,12 +87,10 @@ public class Recorder {
         //audioData = new short[nSamples];
     }
 
-    private void doRecording() {
+    private void doRecording(Handler handler) {
+        long timeElapsed = 0;
+
         Log.i(TAG, "doRecording");
-
-        int read = 0;
-
-        boolean hasStarted = false;//Every microphone needs time to "warm up"
 
         int bufferSize = AudioRecord.getMinBufferSize(samplingRate_inHz, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 
@@ -108,11 +107,15 @@ public class Recorder {
         }
 
         while (isRecording) {
-            if (System.currentTimeMillis() - start_time >= 1000L * max_recordingLength_inSec || audioRecord == null){
+            timeElapsed = System.currentTimeMillis() - start_time;
+            if (timeElapsed >= max_recordingLength_ms || audioRecord == null){
                 break;
             }
-            if (System.currentTimeMillis() - start_time < wait_time_before_recording_ms){
-                continue; //TODO non funziona, audioData inizia sempre con 0
+            else {
+                long finalTimeElapsed = timeElapsed; //Non gli piace se non uso questo valore che è "effecticely final" a causa dell'uso della lambda expression
+                handler.post(() -> {
+                    IRecordingProgress.onRecordingProgress(finalTimeElapsed);
+                });
             }
             if (audioRecord.read(buffer, 0, frame_length_samples) > 0) {
                 for (int i = 0; i < frame_length_samples; i++) {

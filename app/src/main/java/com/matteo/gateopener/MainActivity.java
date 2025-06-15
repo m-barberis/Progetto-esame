@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.widget.Button;
 import android.widget.Chronometer;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,6 +16,7 @@ import com.matteo.gateopener.fastdtw.timeseries.TimeSeries;
 import com.matteo.gateopener.interfaces.DistanceFunction;
 import com.matteo.gateopener.fastdtw.distance.EuclideanDistance;
 import com.matteo.gateopener.interfaces.IRecordingDone;
+import com.matteo.gateopener.interfaces.IRecordingProgress;
 import com.matteo.gateopener.misc.Constants;
 import com.matteo.gateopener.mfcc.MFCC_Extractor;
 import com.matteo.gateopener.recorder.Recorder;
@@ -22,11 +24,12 @@ import com.matteo.gateopener.recorder.Recorder;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements IRecordingDone {
+public class MainActivity extends AppCompatActivity implements IRecordingDone, IRecordingProgress {
     private final String TAG = "MainActivity";
     private Button bttRecord, bttStop;
     private TextView tvSpeaker;
     private Chronometer chronometer;
+    private ProgressBar PGrecording;
     private Recorder recorder;
     private Audio_Framer audioFramer;
     private MFCC_Extractor mfcc_extractor;
@@ -49,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
         setContentView(R.layout.activity_main);
 
         initViews();
-        recorder = new Recorder(this, Constants.AUDIO_SAMPLING_FREQUENCY, Constants.MAX_RECORDING_TIME_S, Constants.DEFAULT_SILENCE_THRESHOLD, Constants.FRAME_LENGTH_SAMPLES, Constants.WAIT_TIME_BEFORE_RECORDING_MS);
+        recorder = new Recorder(this, Constants.AUDIO_SAMPLING_FREQUENCY, Constants.MAX_RECORDING_TIME_MS, Constants.FRAME_LENGTH_SAMPLES);
         audioFramer = new Audio_Framer(Constants.FRAME_SIZE, Constants.FRAME_HOP_SIZE);
         mfcc_extractor = new MFCC_Extractor(Constants.AUDIO_SAMPLING_FREQUENCY, Constants.FRAME_SIZE, Constants.FRAME_HOP_SIZE, Constants.MFCC_COUNT);
         mfcc_classifier = new MFCC_Classifier(Constants.MFCC_COUNT, Constants.NUM_PEOPLE_TO_CLASSIFY);
@@ -78,6 +81,9 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
         bttStop = findViewById(R.id.bttStop);
         tvSpeaker = findViewById(R.id.tvSpeaker);
         chronometer = findViewById(R.id.chronometer);
+        PGrecording = findViewById(R.id.PGrecording);
+        PGrecording.setMax(100);
+        PGrecording.setMin(0);
     }
 
     @Override
@@ -100,6 +106,12 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone {
         tvSpeaker.setText(resultToString(topResult));
         resetData();
     }
+
+    @Override
+    public void onRecordingProgress(long milliseconds) {
+        PGrecording.setProgress((int)(milliseconds / Constants.MAX_RECORDING_TIME_MS) * 100);
+    }
+
 
     private void resetWidgets(){
         bttRecord.setEnabled(true);

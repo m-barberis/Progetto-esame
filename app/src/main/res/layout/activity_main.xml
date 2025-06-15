@@ -48,5 +48,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="00:00"/>
+    <ProgressBar
+        android:id="@+id/PGrecording"
+        android:layout_width="250dp"
+        android:layout_height="60dp"
+        android:progress="0"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:backgroundTint="@color/black"
+        android:progressTint="@color/white"
+        android:visibility="visible"/>
 
 </LinearLayout>
