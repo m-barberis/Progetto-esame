@@ -1,9 +1,7 @@
 package com.matteo.gateopener;
 
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.widget.Button;
-import android.widget.Chronometer;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -26,9 +24,8 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements IRecordingDone, IRecordingProgress {
     private final String TAG = "MainActivity";
-    private Button bttRecord, bttStop;
+    private Button bttRecord;
     private TextView tvSpeaker;
-    private Chronometer chronometer;
     private ProgressBar PGrecording;
     private Recorder recorder;
     private Audio_Framer audioFramer;
@@ -65,25 +62,13 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
             shouldRecordingKeepGoing = true;
             recorder.start();
             bttRecord.setEnabled(false);
-            bttStop.setEnabled(true);
-            chronometer.setBase(SystemClock.elapsedRealtime());
-            chronometer.start();
-        } );
-
-        bttStop.setOnClickListener( (v) -> {
-            shouldRecordingKeepGoing = false;
-            recorder.stop();
         } );
     }
 
     void initViews() {
         bttRecord = findViewById(R.id.bttRecord);
-        bttStop = findViewById(R.id.bttStop);
         tvSpeaker = findViewById(R.id.tvSpeaker);
-        chronometer = findViewById(R.id.chronometer);
         PGrecording = findViewById(R.id.PGrecording);
-        PGrecording.setMax(100);
-        PGrecording.setMin(0);
     }
 
     @Override
@@ -109,14 +94,13 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
 
     @Override
     public void onRecordingProgress(long milliseconds) {
-        PGrecording.setProgress((int)(milliseconds / Constants.MAX_RECORDING_TIME_MS) * 100);
+        int progress = (int)(((double)milliseconds / (double)Constants.MAX_RECORDING_TIME_MS) * 100);
+        PGrecording.setProgress(progress);
     }
 
 
     private void resetWidgets(){
         bttRecord.setEnabled(true);
-        bttStop.setEnabled(false);
-        chronometer.stop();
     }
 
     private void resetData() {
