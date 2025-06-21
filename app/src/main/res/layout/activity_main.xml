@@ -12,42 +12,39 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="0dp"
-        android:gravity="center"
         android:text="GATE OPENER"
+        android:gravity="center"
+        android:textSize="40dp"
+        android:textStyle="bold"
+        android:layout_marginTop="20dp"/>
+
+    <Button
+        android:id="@+id/bttRecord"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Record"
         android:textSize="30dp"
-        android:textStyle="bold" />
+        android:gravity="center_horizontal"
+        android:layout_marginTop="30dp"/>
 
     <ProgressBar
         android:id="@+id/PGrecording"
         android:layout_width="250dp"
         android:layout_height="60dp"
-        android:max="100"
-        android:min="0"
         android:progress="0"
-        android:progressTint="@color/progressGreen"
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:backgroundTint="@color/black"
+        android:progressTint="@color/white"
         android:visibility="visible"/>
 
     <TextView
         android:id="@+id/tvSpeaker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="130dp"
+        android:layout_marginTop="30dp"
         android:text=""
-        android:textSize="50dp"/>
+        android:textSize="20dp"
+        android:textStyle="bold" />
 
-    <Button
-        android:id="@+id/bttRecord"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="10dp"
-        android:paddingHorizontal="20dp"
-        android:layout_marginTop="300dp"
-        android:backgroundTint="@color/button_color"
-        android:text="Record"
-        android:textSize="30dp"
-        android:textColor="@color/white"
-        android:gravity="center_horizontal"/>
 
 </LinearLayout>

@@ -29,8 +29,6 @@ public class Recorder {
     private int samplingRate_inHz;
     private int max_recordingLength_ms;
     private short[] audioData;
-
-    int silenceThreshold;
     private volatile boolean isRecording = false;
     private List<Short> audioDataList = new ArrayList<>();
     private AudioRecord audioRecord;
@@ -42,7 +40,6 @@ public class Recorder {
         this.context = context;
         this.samplingRate_inHz = samplingRate_inHz;
         this.max_recordingLength_ms = max_recordingLength_ms;
-        this.silenceThreshold = silenceThreshold;
         this.frame_length_samples = frame_length_samples;
 
         IRecordingDone = (IRecordingDone) context;
