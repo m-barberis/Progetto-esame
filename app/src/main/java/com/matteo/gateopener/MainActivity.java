@@ -17,6 +17,7 @@ import com.matteo.gateopener.interfaces.IRecordingDone;
 import com.matteo.gateopener.interfaces.IRecordingProgress;
 import com.matteo.gateopener.misc.Constants;
 import com.matteo.gateopener.mfcc.MFCC_Extractor;
+import com.matteo.gateopener.misc.DTW_Reference;
 import com.matteo.gateopener.recorder.Recorder;
 
 import java.util.ArrayList;
@@ -81,6 +82,8 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         int[] results = mfcc_classifier.getResults();
         topResult = mfcc_classifier.getTopResult();
         confidence = mfcc_classifier.getConfidence();
+
+        double[] test = DTW_Reference.loadDoubleArrayFromRawBinary(this, R.raw.berto, DTW_Reference.ref_0_length);
 
         //Test per DTW
         //testDTW();
