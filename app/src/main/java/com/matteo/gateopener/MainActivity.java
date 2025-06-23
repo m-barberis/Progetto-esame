@@ -1,5 +1,6 @@
 package com.matteo.gateopener;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -9,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.matteo.gateopener.classifier.MFCC_Classifier;
 import com.matteo.gateopener.audio_framing.Audio_Framer;
+import com.matteo.gateopener.fastdtw.dtw.DTW_Computing;
 import com.matteo.gateopener.fastdtw.dtw.FastDTW;
 import com.matteo.gateopener.fastdtw.timeseries.TimeSeries;
 import com.matteo.gateopener.interfaces.DistanceFunction;
@@ -17,7 +19,6 @@ import com.matteo.gateopener.interfaces.IRecordingDone;
 import com.matteo.gateopener.interfaces.IRecordingProgress;
 import com.matteo.gateopener.misc.Constants;
 import com.matteo.gateopener.mfcc.MFCC_Extractor;
-import com.matteo.gateopener.misc.DTW_Reference;
 import com.matteo.gateopener.recorder.Recorder;
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements IRecordingDone, IRecordingProgress {
     private final String TAG = "MainActivity";
+    Context context;
     private Button bttRecord;
     private TextView tvSpeaker;
     private TextView tvConfidence;
@@ -36,8 +38,10 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
     private int[] results;
     private int topResult = 0;
     private double confidence = 0;
+    private double distance = 0;
     private FastDTW fastDTW;
     private TimeSeries tsTest1, tsTest2;
+    private DTW_Computing dtwComputing;
     private DistanceFunction distanceFunction;
     private boolean shouldRecordingKeepGoing = false;
     double[][] mfccMatrix;
@@ -59,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         results = new int[Constants.NUM_PEOPLE_TO_CLASSIFY];
         fastDTW = new FastDTW();
         distanceFunction = new EuclideanDistance();
+        dtwComputing = new DTW_Computing(this, 4);
 
 
         bttRecord.setOnClickListener( (v) -> {
@@ -82,8 +87,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         int[] results = mfcc_classifier.getResults();
         topResult = mfcc_classifier.getTopResult();
         confidence = mfcc_classifier.getConfidence();
-
-        double[] test = DTW_Reference.loadDoubleArrayFromRawBinary(this, R.raw.berto, DTW_Reference.ref_0_length);
+        distance = dtwComputing.getMinDistance(audioData);
 
         //Test per DTW
         //testDTW();
@@ -120,7 +124,9 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
             results[i] = 0;
         }
         topResult = 0;
+        distance = 0;
         mfcc_classifier.reset();
+        dtwComputing.reset();
     }
 
     private String resultToString(int result){
