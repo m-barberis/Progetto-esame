@@ -77,7 +77,6 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         mfcc_classifier.classifyMFCCMatrix(mfccMatrix);
         int[] results = mfcc_classifier.getResults();
         topResult = mfcc_classifier.getTopResult();
-        double confidence = mfcc_classifier.getConfidence();
 
         //Test per DTW
         //testDTW();
@@ -119,13 +118,13 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
     private String resultToString(int result){
         switch (result){
             case 0:
-                return "Speaker: Berto";
+                return "Berto";
             case 1:
-                return "Speaker: Iazze";
+                return "Iazze";
             case 2:
-                return "Speaker: MatteBarba";
+                return "MatteBarba";
             case 3:
-                return "Speaker: MatteTornar";
+                return "MatteTornar";
             default:
                 return "Invalid result";
         }
