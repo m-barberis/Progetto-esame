@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         //Test per MFCC
         //testMFCC();
 
-        //MFCC di dati reali
+        //Test MFCC di dati reali
         //mfccMatrix = mfcc_extractor.extractMFCC(audioData);
 
         resetWidgets();
