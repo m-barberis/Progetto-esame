@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
     private final String TAG = "MainActivity";
     private Button bttRecord;
     private TextView tvSpeaker;
+    private TextView tvConfidence;
     private ProgressBar PGrecording;
     private Recorder recorder;
     private Audio_Framer audioFramer;
@@ -33,6 +34,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
     private MFCC_Classifier mfcc_classifier;
     private int[] results;
     private int topResult = 0;
+    private double confidence = 0;
     private FastDTW fastDTW;
     private TimeSeries tsTest1, tsTest2;
     private DistanceFunction distanceFunction;
@@ -68,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
     void initViews() {
         bttRecord = findViewById(R.id.bttRecord);
         tvSpeaker = findViewById(R.id.tvSpeaker);
+        tvConfidence = findViewById(R.id.tvConfidence);
         PGrecording = findViewById(R.id.PGrecording);
     }
 
@@ -77,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         mfcc_classifier.classifyMFCCMatrix(mfccMatrix);
         int[] results = mfcc_classifier.getResults();
         topResult = mfcc_classifier.getTopResult();
+        confidence = mfcc_classifier.getConfidence();
 
         //Test per DTW
         //testDTW();
@@ -89,6 +93,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
 
         resetWidgets();
         tvSpeaker.setText(resultToString(topResult));
+        tvConfidence.setText("Confidence: "+ String.format("%.2f", confidence));
         resetData();
     }
 

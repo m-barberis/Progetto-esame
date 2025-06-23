@@ -37,13 +37,22 @@
         android:text=""
         android:textSize="50dp"/>
 
+    <TextView
+        android:id="@+id/tvConfidence"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text=""
+        android:textSize="20dp"
+        android:textStyle="italic"/>
+
     <Button
         android:id="@+id/bttRecord"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"
         android:paddingHorizontal="20dp"
-        android:layout_marginTop="300dp"
+        android:layout_marginTop="250dp"
         android:backgroundTint="@color/button_color"
         android:text="Record"
         android:textSize="30dp"
