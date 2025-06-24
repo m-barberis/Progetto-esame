@@ -9,4 +9,6 @@ public class Constants {
     public static final int MAX_RECORDING_TIME_MS = 3000;
     public static final int FRAME_LENGTH_SAMPLES = 400;
     public static final int NUM_PEOPLE_TO_CLASSIFY = 4;
+    public static final int LOWER_DISTANCE_THRESHOLD = 7;
+    public static final int HIGHER_DISTANCE_THRESHOLD = 13;
 }

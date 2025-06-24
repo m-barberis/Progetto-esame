@@ -28,8 +28,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
     private final String TAG = "MainActivity";
     Context context;
     private Button bttRecord;
-    private TextView tvSpeaker;
-    private TextView tvConfidence;
+    private TextView tvSpeaker, tvConfidence, tvPassword, tvGateStatus;
     private ProgressBar PGrecording;
     private Recorder recorder;
     private Audio_Framer audioFramer;
@@ -77,6 +76,8 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         bttRecord = findViewById(R.id.bttRecord);
         tvSpeaker = findViewById(R.id.tvSpeaker);
         tvConfidence = findViewById(R.id.tvConfidence);
+        tvPassword = findViewById(R.id.tvPassword);
+        tvGateStatus = findViewById(R.id.tvGateStatus);
         PGrecording = findViewById(R.id.PGrecording);
     }
 
@@ -88,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         topResult = mfcc_classifier.getTopResult();
         confidence = mfcc_classifier.getConfidence();
         distance = dtwComputing.getMinDistance(audioData);
+
 
         //Test per DTW
         //testDTW();
@@ -101,6 +103,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         resetWidgets();
         tvSpeaker.setText(resultToString(topResult));
         tvConfidence.setText("Confidence: "+ String.format("%.2f", confidence));
+        setPasswordAndStatus();
         resetData();
     }
 
@@ -110,7 +113,21 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         PGrecording.setProgress(progress);
     }
 
-
+    private void setPasswordAndStatus() {
+        if (distance > Constants.LOWER_DISTANCE_THRESHOLD && distance < Constants.HIGHER_DISTANCE_THRESHOLD) {
+            tvPassword.setText("Right password!");
+            if (topResult == 2) {
+                tvGateStatus.setText("GATE OPENING...");
+            }
+            else {
+                tvGateStatus.setText("GATE CLOSED");
+            }
+        }
+        else {
+            tvPassword.setText("Wrong password!");
+            tvGateStatus.setText("GATE CLOSED");
+        }
+    }
     private void resetWidgets(){
         bttRecord.setEnabled(true);
     }

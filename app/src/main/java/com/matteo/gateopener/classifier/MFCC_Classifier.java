@@ -41,14 +41,14 @@ public class MFCC_Classifier {
         }
     }
     public double getConfidence(){
-        int first = 0;
         int total = 0;
-        for (int result : results) {
-            if (result > first) {
-                first = result;
-                total += result;
-            }
+        int topVotes = 0;
+        for (int count : results) {
+            total += count;
         }
-        return (double) first / (double)total;
+        topVotes = results[getTopResult()];
+
+        if (total == 0) return 0.0; // per evitare divisioni per zero
+        return (double) topVotes / (double) total;
     }
 }
