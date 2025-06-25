@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         setContentView(R.layout.activity_main);
 
         initViews();
-        recorder = new Recorder(this, Constants.AUDIO_SAMPLING_FREQUENCY, Constants.MAX_RECORDING_TIME_MS, Constants.FRAME_LENGTH_SAMPLES);
+        recorder = new Recorder(this, Constants.AUDIO_SAMPLING_FREQUENCY, Constants.MAX_RECORDING_TIME_MS);
         audioFramer = new Audio_Framer(Constants.FRAME_SIZE, Constants.FRAME_HOP_SIZE);
         mfcc_extractor = new MFCC_Extractor(Constants.AUDIO_SAMPLING_FREQUENCY, Constants.FRAME_SIZE, Constants.FRAME_HOP_SIZE, Constants.MFCC_COUNT);
         mfcc_classifier = new MFCC_Classifier(Constants.MFCC_COUNT, Constants.NUM_PEOPLE_TO_CLASSIFY);

@@ -36,14 +36,12 @@ public class Recorder {
     private AudioRecord audioRecord;
     private IRecordingDone IRecordingDone;
     private IRecordingProgress IRecordingProgress;
-    private int frame_length_samples;
 
-    public Recorder(Context context, int samplingRate_inHz, int max_recordingLength_ms, int frame_length_samples) {
+    public Recorder(Context context, int samplingRate_inHz, int max_recordingLength_ms) {
         this.context = context;
         this.samplingRate_inHz = samplingRate_inHz;
         this.max_recordingLength_ms = max_recordingLength_ms;
         this.silenceThreshold = silenceThreshold;
-        this.frame_length_samples = frame_length_samples;
 
         IRecordingDone = (IRecordingDone) context;
         IRecordingProgress = (IRecordingProgress) context;
@@ -101,9 +99,9 @@ public class Recorder {
         long start_time = System.currentTimeMillis();
 
         // WARM-UP: ignora i primi N frame
-        int warmupFrames = 2;
+        int warmupFrames = 5;
         for (int i = 0; i < warmupFrames; i++) {
-            audioRecord.read(buffer, 0, frame_length_samples);
+            audioRecord.read(buffer, 0, buffer.length);
         }
 
         while (isRecording) {
@@ -117,8 +115,8 @@ public class Recorder {
                     IRecordingProgress.onRecordingProgress(finalTimeElapsed);
                 });
             }
-            if (audioRecord.read(buffer, 0, frame_length_samples) > 0) {
-                for (int i = 0; i < frame_length_samples; i++) {
+            if (audioRecord.read(buffer, 0, buffer.length) > 0) {
+                for (int i = 0; i < buffer.length; i++) {
                     audioDataList.add(buffer[i]);
                 }
             }

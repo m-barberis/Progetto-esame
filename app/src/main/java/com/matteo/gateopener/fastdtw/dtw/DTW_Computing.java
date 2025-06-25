@@ -13,38 +13,34 @@ import java.util.List;
 
 public class DTW_Computing {
     Context context;
-    static double[] audioData_toDouble;
+    double[] audioData_toDouble;
 
-    static private DistanceFunction distanceFunction;
-    int numReferences;
-    static double[] distances;
-    static List<double[]> inputList;
-    List<double[]> referenceList_0;
-    List<double[]> referenceList_1;
-    List<double[]> referenceList_2;
-    List<double[]> referenceList_3;
-    static TimeSeries tsInput, tsRef0, tsRef1, tsRef2, tsRef3;
+    private DistanceFunction distanceFunction;
+    private int numReferences;
+    private double[] distances;
+    private List<double[]> inputList;
+    private TimeSeries tsInput, tsRef0, tsRef1, tsRef2, tsRef3;
     public DTW_Computing(Context context, int numReferences) {
         this.context = context;
         this.numReferences = numReferences;
         this.distances = new double[numReferences];
         distanceFunction = new EuclideanDistance();
 
-        referenceList_0 = new ArrayList<>();
+        List<double[]> referenceList_0 = new ArrayList<>();
         referenceList_0.add(DTW_Reference.loadDoubleArrayFromRawBinary(context, R.raw.berto, DTW_Reference.ref_0_length));
         tsRef0 = new TimeSeries(referenceList_0);
-        referenceList_1 = new ArrayList<>();
+        List<double[]> referenceList_1 = new ArrayList<>();
         referenceList_1.add(DTW_Reference.loadDoubleArrayFromRawBinary(context, R.raw.iazze, DTW_Reference.ref_1_length));
         tsRef1 = new TimeSeries(referenceList_1);
-        referenceList_2 = new ArrayList<>();
+        List<double[]> referenceList_2 = new ArrayList<>();
         referenceList_2.add(DTW_Reference.loadDoubleArrayFromRawBinary(context, R.raw.matteob, DTW_Reference.ref_2_length));
         tsRef2 = new TimeSeries(referenceList_2);
-        referenceList_3 = new ArrayList<>();
+        List<double[]> referenceList_3 = new ArrayList<>();
         referenceList_3.add(DTW_Reference.loadDoubleArrayFromRawBinary(context, R.raw.torny, DTW_Reference.ref_3_length));
         tsRef3 = new TimeSeries(referenceList_3);
     }
 
-    private static void computeDistances(short[] audioData) {
+    private void computeDistances(short[] audioData) {
         normalizeAudioData(audioData);
         inputList = new ArrayList<>();
         inputList.add(audioData_toDouble);
@@ -55,7 +51,7 @@ public class DTW_Computing {
         distances[2] = FastDTW.getWarpDistance(tsInput, tsRef2, distanceFunction);
         distances[3] = FastDTW.getWarpDistance(tsInput, tsRef3, distanceFunction);
     }
-    public static double getMinDistance(short[] audioData) {
+    public double getMinDistance(short[] audioData) {
         computeDistances(audioData);
 
         int first = 0;
@@ -67,7 +63,7 @@ public class DTW_Computing {
         return distances[first];
     }
 
-    private static void normalizeAudioData(short[] audioData) {
+    private void normalizeAudioData(short[] audioData) {
         audioData_toDouble = new double[audioData.length];
         for (int i = 0; i < audioData.length; i++) {
             audioData_toDouble[i] = audioData[i] / 32768.0;
