@@ -1,6 +1,5 @@
 package com.matteo.gateopener;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -11,8 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.matteo.gateopener.classifier.MFCC_Classifier;
 import com.matteo.gateopener.audio_framing.Audio_Framer;
 import com.matteo.gateopener.fastdtw.dtw.FastDTW;
-import com.matteo.gateopener.fastdtw.timeseries.TimeSeries;
-import com.matteo.gateopener.interfaces.DistanceFunction;
+import com.matteo.gateopener.fastdtw.util.DistanceFunction;
 import com.matteo.gateopener.fastdtw.util.EuclideanDistance;
 import com.matteo.gateopener.interfaces.DTWDone;
 import com.matteo.gateopener.interfaces.IRecordingDone;
@@ -21,9 +19,6 @@ import com.matteo.gateopener.misc.Constants;
 import com.matteo.gateopener.mfcc.MFCC_Extractor;
 import com.matteo.gateopener.misc.Test;
 import com.matteo.gateopener.recorder.Recorder;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements IRecordingDone, IRecordingProgress, DTWDone {
     private final String TAG = "MainActivity";
@@ -90,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
 
 
         //Test per DTW
-        //Test.testDTW();
+        Test.testDTW();
 
         //Test per MFCC
         //Test.testMFCC();

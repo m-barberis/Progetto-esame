@@ -5,7 +5,7 @@
  * stansalvador@hotmail.com
  */
 
-package com.matteo.gateopener.interfaces;
+package com.matteo.gateopener.fastdtw.util;
 
 public interface DistanceFunction
 {

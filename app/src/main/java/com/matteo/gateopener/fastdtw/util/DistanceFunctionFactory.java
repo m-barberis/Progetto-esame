@@ -8,8 +8,6 @@
 package com.matteo.gateopener.fastdtw.util;
 
 
-import com.matteo.gateopener.interfaces.DistanceFunction;
-
 public class DistanceFunctionFactory
 {
    public static DistanceFunction EUCLIDEAN_DIST_FN = new EuclideanDistance();

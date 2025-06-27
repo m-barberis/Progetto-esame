@@ -8,7 +8,7 @@
 package com.matteo.gateopener.fastdtw.dtw;
 
 import com.matteo.gateopener.fastdtw.timeseries.TimeSeries;
-import com.matteo.gateopener.interfaces.DistanceFunction;
+import com.matteo.gateopener.fastdtw.util.DistanceFunction;
 import com.matteo.gateopener.fastdtw.matrix.ColMajorCell;
 
 import java.util.Iterator;

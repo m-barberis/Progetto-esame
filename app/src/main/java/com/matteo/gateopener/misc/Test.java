@@ -3,7 +3,8 @@ package com.matteo.gateopener.misc;
 import com.matteo.gateopener.fastdtw.dtw.FastDTW;
 import com.matteo.gateopener.fastdtw.timeseries.TimeSeries;
 import com.matteo.gateopener.fastdtw.util.EuclideanDistance;
-import com.matteo.gateopener.interfaces.DistanceFunction;
+import com.matteo.gateopener.fastdtw.util.DistanceFunction;
+import com.matteo.gateopener.fastdtw.util.ManhattanDistance;
 import com.matteo.gateopener.mfcc.MFCC_Extractor;
 
 
@@ -17,9 +18,9 @@ public class Test {
         for (int i = 0; i < 200; i++) {
             x[i] = i;
         }
-        double[] x2 = new double[200];
-        for (int i = 0; i < 200; i++) {
-            x2[i] = (double) i + 1;
+        double[] x2 = new double[100];
+        for (int i = 0; i < 100; i++) {
+            x2[i] = (double) -i;
         }
         double distance;
         TimeSeries tsTest1 = new TimeSeries(x);

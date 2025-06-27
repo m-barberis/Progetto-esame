@@ -8,8 +8,6 @@
 package com.matteo.gateopener.fastdtw.util;
 
 
-import com.matteo.gateopener.interfaces.DistanceFunction;
-
 public class ManhattanDistance implements DistanceFunction
 {
    public ManhattanDistance()

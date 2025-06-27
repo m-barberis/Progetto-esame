@@ -9,7 +9,7 @@ package com.matteo.gateopener.fastdtw.dtw;
 
 import com.matteo.gateopener.fastdtw.timeseries.TimeSeries;
 import com.matteo.gateopener.fastdtw.timeseries.PAA;
-import com.matteo.gateopener.interfaces.DistanceFunction;
+import com.matteo.gateopener.fastdtw.util.DistanceFunction;
 
 
 public class FastDTW
