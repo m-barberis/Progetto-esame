@@ -10,19 +10,17 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.matteo.gateopener.classifier.MFCC_Classifier;
 import com.matteo.gateopener.audio_framing.Audio_Framer;
-import com.matteo.gateopener.fastdtw.dtw.DTW_Computing;
 import com.matteo.gateopener.fastdtw.dtw.FastDTW;
 import com.matteo.gateopener.fastdtw.timeseries.TimeSeries;
-import com.matteo.gateopener.interfaces.DTWDone;
 import com.matteo.gateopener.interfaces.DistanceFunction;
-import com.matteo.gateopener.fastdtw.distance.EuclideanDistance;
+import com.matteo.gateopener.fastdtw.util.EuclideanDistance;
+import com.matteo.gateopener.interfaces.DTWDone;
 import com.matteo.gateopener.interfaces.IRecordingDone;
 import com.matteo.gateopener.interfaces.IRecordingProgress;
 import com.matteo.gateopener.misc.Constants;
 import com.matteo.gateopener.mfcc.MFCC_Extractor;
 import com.matteo.gateopener.recorder.Recorder;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,14 +34,15 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
     private Audio_Framer audioFramer;
     private MFCC_Extractor mfcc_extractor;
     private MFCC_Classifier mfcc_classifier;
+    private DistanceFunction distanceFunction;
+
     private int[] results;
     private int topResult = 0;
     private double confidence = 0;
     private double distance = 0;
     private FastDTW fastDTW;
     private TimeSeries tsTest1, tsTest2;
-    private DTW_Computing dtwComputing;
-    private DistanceFunction distanceFunction;
+
     private boolean shouldRecordingKeepGoing = false;
     private boolean dtw_free;
     double[][] mfccMatrix;
@@ -66,11 +65,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         fastDTW = new FastDTW();
         dtw_free = true;
         distanceFunction = new EuclideanDistance();
-        try {
-            dtwComputing = new DTW_Computing(this, 4);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+
 
 
         bttRecord.setOnClickListener( (v) -> {
@@ -96,11 +91,10 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         int[] results = mfcc_classifier.getResults();
         topResult = mfcc_classifier.getTopResult();
         confidence = mfcc_classifier.getConfidence();
-        dtwComputing.computeMinDistance(audioData);
 
 
         //Test per DTW
-        //testDTW();
+        testDTW();
 
         //Test per MFCC
         //testMFCC();
@@ -158,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
 
     private void resetDTWData(){
         distance = 0;
-        dtwComputing.reset();
+
     }
 
     private String resultToString(int result){
@@ -176,24 +170,23 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         }
     }
 
+     //TODO: DA MODIFICARE SE SI VUOLE USARE
     private void testDTW() {
-        List<double[]> xlist1 = new ArrayList<>();
         double[] x = new double[200];
         for (int i = 0; i < 200; i++) {
             x[i] = i;
         }
-        xlist1.add(x.clone());
-        List<double[]> xlist2 = new ArrayList<>();
         double[] x2 = new double[200];
         for (int i = 0; i < 200; i++) {
-            x2[i] = (double) i-1;
+            x2[i] = (double) -i;
         }
-        xlist2.add(x2.clone());
         double distance;
-        tsTest1 = new TimeSeries(xlist1);
-        tsTest2 = new TimeSeries(xlist2);
-        distance = FastDTW.getWarpDistance(tsTest1, tsTest2, distanceFunction);
+        tsTest1 = new TimeSeries(x);
+        tsTest2 = new TimeSeries(x2);
+        distance = FastDTW.getWarpDistBetween(tsTest1, tsTest2, distanceFunction);
     }
+
+
 
     private void testMFCC() {
         short[] y = new short[400];

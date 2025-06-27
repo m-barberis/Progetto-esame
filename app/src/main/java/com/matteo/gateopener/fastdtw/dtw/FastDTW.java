@@ -1,27 +1,81 @@
+/*
+ * FastDTW.java   Jul 14, 2004
+ *
+ * Copyright (c) 2004 Stan Salvador
+ * stansalvador@hotmail.com
+ */
+
 package com.matteo.gateopener.fastdtw.dtw;
 
 import com.matteo.gateopener.fastdtw.timeseries.TimeSeries;
+import com.matteo.gateopener.fastdtw.timeseries.PAA;
 import com.matteo.gateopener.interfaces.DistanceFunction;
 
-public class FastDTW {
-    public static double getWarpDistance(TimeSeries ts1, TimeSeries ts2, DistanceFunction distFn) {
-        int len1 = ts1.size();
-        int len2 = ts2.size();
-        double[][] cost = new double[len1 + 1][len2 + 1];
 
-        for (int i = 0; i <= len1; i++)
-            for (int j = 0; j <= len2; j++)
-                cost[i][j] = Double.POSITIVE_INFINITY;
+public class FastDTW
+{
+   // CONSTANTS
+   final static int DEFAULT_SEARCH_RADIUS = 1;
 
-        cost[0][0] = 0;
 
-        for (int i = 1; i <= len1; i++) {
-            for (int j = 1; j <= len2; j++) {
-                double d = distFn.distance(ts1.getPoint(i - 1), ts2.getPoint(j - 1));
-                cost[i][j] = d + Math.min(Math.min(cost[i - 1][j], cost[i][j - 1]), cost[i - 1][j - 1]);
-            }
-        }
+   public static double getWarpDistBetween(TimeSeries tsI, TimeSeries tsJ, DistanceFunction distFn)
+   {
+      return fastDTW(tsI, tsJ, DEFAULT_SEARCH_RADIUS, distFn).getDistance();
+   }
 
-        return cost[len1][len2];
-    }
-}
+
+   public static double getWarpDistBetween(TimeSeries tsI, TimeSeries tsJ, int searchRadius, DistanceFunction distFn)
+   {
+      return fastDTW(tsI, tsJ, searchRadius, distFn).getDistance();
+   }
+
+
+   public static WarpPath getWarpPathBetween(TimeSeries tsI, TimeSeries tsJ, DistanceFunction distFn)
+   {
+      return fastDTW(tsI, tsJ, DEFAULT_SEARCH_RADIUS, distFn).getPath();
+   }
+
+
+   public static WarpPath getWarpPathBetween(TimeSeries tsI, TimeSeries tsJ, int searchRadius, DistanceFunction distFn)
+   {
+      return fastDTW(tsI, tsJ, searchRadius, distFn).getPath();
+   }
+
+
+   public static TimeWarpInfo getWarpInfoBetween(TimeSeries tsI, TimeSeries tsJ, int searchRadius, DistanceFunction distFn)
+   {
+      return fastDTW(tsI, tsJ, searchRadius, distFn);
+   }
+
+
+   private static TimeWarpInfo fastDTW(TimeSeries tsI, TimeSeries tsJ, int searchRadius, DistanceFunction distFn)
+   {
+      if (searchRadius < 0)
+         searchRadius = 0;
+
+      final int minTSsize = searchRadius+2;
+
+      if ( (tsI.size() <= minTSsize) || (tsJ.size()<=minTSsize) )
+      {
+         // Perform full Dynamic Time Warping.
+         return DTW.getWarpInfoBetween(tsI, tsJ, distFn);
+      }
+      else
+      {
+         final double resolutionFactor = 2.0;
+
+         final PAA shrunkI = new PAA(tsI, (int)(tsI.size()/resolutionFactor));
+         final PAA shrunkJ = new PAA(tsJ, (int)(tsJ.size()/resolutionFactor));
+
+          // Determine the search window that constrains the area of the cost matrix that will be evaluated based on
+          //    the warp path found at the previous resolution (smaller time series).
+          final SearchWindow window = new ExpandedResWindow(tsI, tsJ, shrunkI, shrunkJ,
+                                                            FastDTW.getWarpPathBetween(shrunkI, shrunkJ, searchRadius, distFn),
+                                                            searchRadius);
+
+         // Find the optimal warp path through this search window constraint.
+         return DTW.getWarpInfoBetween(tsI, tsJ, window, distFn);
+      }  // end if
+   }  // end recFastDTW(...)
+
+}  // end class fastDTW
