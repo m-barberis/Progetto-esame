@@ -10,7 +10,7 @@ public class TimeSeries {
     }
 
     public int size() {
-        return sequence.size();
+        return sequence.get(0).length;
     }
 
     public double[] getPoint(int i) {

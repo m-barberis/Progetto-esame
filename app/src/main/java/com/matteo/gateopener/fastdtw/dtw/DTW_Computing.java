@@ -1,18 +1,23 @@
 package com.matteo.gateopener.fastdtw.dtw;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 
 import com.matteo.gateopener.R;
 import com.matteo.gateopener.fastdtw.distance.EuclideanDistance;
 import com.matteo.gateopener.fastdtw.timeseries.TimeSeries;
+import com.matteo.gateopener.interfaces.DTWDone;
 import com.matteo.gateopener.interfaces.DistanceFunction;
 import com.matteo.gateopener.misc.DTW_Reference;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DTW_Computing {
     Context context;
+    private DTWDone onDtwDone;
     double[] audioData_toDouble;
 
     private DistanceFunction distanceFunction;
@@ -20,8 +25,9 @@ public class DTW_Computing {
     private double[] distances;
     private List<double[]> inputList;
     private TimeSeries tsInput, tsRef0, tsRef1, tsRef2, tsRef3;
-    public DTW_Computing(Context context, int numReferences) {
+    public DTW_Computing(Context context, int numReferences) throws IOException {
         this.context = context;
+        onDtwDone = (DTWDone) context;
         this.numReferences = numReferences;
         this.distances = new double[numReferences];
         distanceFunction = new EuclideanDistance();
@@ -51,9 +57,19 @@ public class DTW_Computing {
         distances[2] = FastDTW.getWarpDistance(tsInput, tsRef2, distanceFunction);
         distances[3] = FastDTW.getWarpDistance(tsInput, tsRef3, distanceFunction);
     }
-    public double getMinDistance(short[] audioData) {
-        computeDistances(audioData);
 
+    public void computeMinDistance(short[] audioData){
+        new Thread(() -> {
+            computeDistances(audioData);
+            double min_distance = getMinDistance(distances);
+
+            android.os.Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(() -> {
+                onDtwDone.onDTWResult(min_distance);
+            });
+        }).start();
+    }
+    private double getMinDistance(double[] distances) {
         int first = 0;
         for (int i = 0; i < distances.length; i++) {
             if (distances[i] <= distances[first]) {

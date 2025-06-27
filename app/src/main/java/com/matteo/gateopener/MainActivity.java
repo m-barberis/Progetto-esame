@@ -13,6 +13,7 @@ import com.matteo.gateopener.audio_framing.Audio_Framer;
 import com.matteo.gateopener.fastdtw.dtw.DTW_Computing;
 import com.matteo.gateopener.fastdtw.dtw.FastDTW;
 import com.matteo.gateopener.fastdtw.timeseries.TimeSeries;
+import com.matteo.gateopener.interfaces.DTWDone;
 import com.matteo.gateopener.interfaces.DistanceFunction;
 import com.matteo.gateopener.fastdtw.distance.EuclideanDistance;
 import com.matteo.gateopener.interfaces.IRecordingDone;
@@ -21,10 +22,11 @@ import com.matteo.gateopener.misc.Constants;
 import com.matteo.gateopener.mfcc.MFCC_Extractor;
 import com.matteo.gateopener.recorder.Recorder;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements IRecordingDone, IRecordingProgress {
+public class MainActivity extends AppCompatActivity implements IRecordingDone, IRecordingProgress, DTWDone {
     private final String TAG = "MainActivity";
     Context context;
     private Button bttRecord;
@@ -43,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
     private DTW_Computing dtwComputing;
     private DistanceFunction distanceFunction;
     private boolean shouldRecordingKeepGoing = false;
+    private boolean dtw_free;
     double[][] mfccMatrix;
     private final int FS = Constants.AUDIO_SAMPLING_FREQUENCY; //da cambiare
 
@@ -61,8 +64,13 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         mfcc_classifier = new MFCC_Classifier(Constants.MFCC_COUNT, Constants.NUM_PEOPLE_TO_CLASSIFY);
         results = new int[Constants.NUM_PEOPLE_TO_CLASSIFY];
         fastDTW = new FastDTW();
+        dtw_free = true;
         distanceFunction = new EuclideanDistance();
-        dtwComputing = new DTW_Computing(this, 4);
+        try {
+            dtwComputing = new DTW_Computing(this, 4);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
 
         bttRecord.setOnClickListener( (v) -> {
@@ -88,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         int[] results = mfcc_classifier.getResults();
         topResult = mfcc_classifier.getTopResult();
         confidence = mfcc_classifier.getConfidence();
-        distance = dtwComputing.getMinDistance(audioData);
+        dtwComputing.computeMinDistance(audioData);
 
 
         //Test per DTW
@@ -99,12 +107,16 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
 
         //Test MFCC di dati reali
         //mfccMatrix = mfcc_extractor.extractMFCC(audioData);
-
-        resetWidgets();
         tvSpeaker.setText(resultToString(topResult));
         tvConfidence.setText("Confidence: "+ String.format("%.2f", confidence));
+        resetMfccData();
+    }
+    @Override
+    public void onDTWResult(double result) {
+        distance = result;
         setPasswordAndStatus();
-        resetData();
+        resetDTWData();
+        resetWidgets();
     }
 
     @Override
@@ -132,7 +144,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         bttRecord.setEnabled(true);
     }
 
-    private void resetData() {
+    private void resetMfccData() {
         // Resetta i dati audio e MFCC
         mfccMatrix = null;
 
@@ -141,8 +153,11 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
             results[i] = 0;
         }
         topResult = 0;
-        distance = 0;
         mfcc_classifier.reset();
+    }
+
+    private void resetDTWData(){
+        distance = 0;
         dtwComputing.reset();
     }
 
