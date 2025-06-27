@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
     private int[] results;
     private int topResult = 0;
     private double confidence = 0;
-    private double distance = 0;
+    private double warpDistance = 0;
     private FastDTW fastDTW;
 
     private boolean shouldRecordingKeepGoing = false;
@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
     public void onRecordingDone(short[] audioData) {
         mfccMatrix = mfcc_extractor.extractMFCC(audioData);
         mfcc_classifier.classifyMFCCMatrix(mfccMatrix);
-        int[] results = mfcc_classifier.getResults();
+        int[] results = mfcc_classifier.getResults(); // per debug
         topResult = mfcc_classifier.getTopResult();
         confidence = mfcc_classifier.getConfidence();
 
@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
     }
     @Override
     public void onDTWResult(double result) {
-        distance = result;
+        warpDistance = result;
         setPasswordAndStatus();
         resetDTWData();
         resetWidgets();
@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
     }
 
     private void setPasswordAndStatus() {
-        if (distance > Constants.LOWER_DISTANCE_THRESHOLD && distance < Constants.HIGHER_DISTANCE_THRESHOLD) {
+        if (warpDistance > Constants.LOWER_DISTANCE_THRESHOLD && warpDistance < Constants.HIGHER_DISTANCE_THRESHOLD) {
             tvPassword.setText("Right password!");
             if (topResult == 2) {
                 tvGateStatus.setText("GATE OPENING...");
@@ -146,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
     }
 
     private void resetDTWData(){
-        distance = 0;
+        warpDistance = 0;
 
     }
 
