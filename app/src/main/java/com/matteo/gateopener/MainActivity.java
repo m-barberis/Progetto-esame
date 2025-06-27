@@ -19,6 +19,7 @@ import com.matteo.gateopener.interfaces.IRecordingDone;
 import com.matteo.gateopener.interfaces.IRecordingProgress;
 import com.matteo.gateopener.misc.Constants;
 import com.matteo.gateopener.mfcc.MFCC_Extractor;
+import com.matteo.gateopener.misc.Test;
 import com.matteo.gateopener.recorder.Recorder;
 
 import java.util.ArrayList;
@@ -26,7 +27,6 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements IRecordingDone, IRecordingProgress, DTWDone {
     private final String TAG = "MainActivity";
-    Context context;
     private Button bttRecord;
     private TextView tvSpeaker, tvConfidence, tvPassword, tvGateStatus;
     private ProgressBar PGrecording;
@@ -41,14 +41,10 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
     private double confidence = 0;
     private double distance = 0;
     private FastDTW fastDTW;
-    private TimeSeries tsTest1, tsTest2;
 
     private boolean shouldRecordingKeepGoing = false;
     private boolean dtw_free;
     double[][] mfccMatrix;
-    private final int FS = Constants.AUDIO_SAMPLING_FREQUENCY; //da cambiare
-
-
 
 
     @Override
@@ -94,13 +90,11 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
 
 
         //Test per DTW
-        testDTW();
+        //Test.testDTW();
 
         //Test per MFCC
-        //testMFCC();
+        //Test.testMFCC();
 
-        //Test MFCC di dati reali
-        //mfccMatrix = mfcc_extractor.extractMFCC(audioData);
         resetWidgets();
         tvSpeaker.setText(resultToString(topResult));
         tvConfidence.setText("Confidence: "+ String.format("%.2f", confidence));
@@ -171,28 +165,4 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         }
     }
 
-    private void testDTW() {
-        double[] x = new double[200];
-        for (int i = 0; i < 200; i++) {
-            x[i] = i;
-        }
-        double[] x2 = new double[200];
-        for (int i = 0; i < 200; i++) {
-            x2[i] = (double) -i;
-        }
-        double distance;
-        tsTest1 = new TimeSeries(x);
-        tsTest2 = new TimeSeries(x2);
-        distance = FastDTW.getWarpDistBetween(tsTest1, tsTest2, distanceFunction);
-    }
-
-
-
-    private void testMFCC() {
-        short[] y = new short[400];
-        for (int i = 0; i < 400; i++){
-            y[i] = (short)i;
-        }
-        mfccMatrix = mfcc_extractor.extractMFCC(y);
-    }
 }
