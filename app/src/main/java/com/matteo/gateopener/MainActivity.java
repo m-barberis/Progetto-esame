@@ -101,6 +101,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
 
         //Test MFCC di dati reali
         //mfccMatrix = mfcc_extractor.extractMFCC(audioData);
+        resetWidgets();
         tvSpeaker.setText(resultToString(topResult));
         tvConfidence.setText("Confidence: "+ String.format("%.2f", confidence));
         resetMfccData();
@@ -170,7 +171,6 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         }
     }
 
-     //TODO: DA MODIFICARE SE SI VUOLE USARE
     private void testDTW() {
         double[] x = new double[200];
         for (int i = 0; i < 200; i++) {
