@@ -11,7 +11,6 @@ import com.matteo.gateopener.classifier.MFCC_Classifier;
 import com.matteo.gateopener.audio_framing.Audio_Framer;
 import com.matteo.gateopener.fastdtw.DTW_Computing;
 import com.matteo.gateopener.fastdtw.util.DistanceFunction;
-import com.matteo.gateopener.fastdtw.util.EuclideanDistance;
 import com.matteo.gateopener.fastdtw.util.ManhattanDistance;
 import com.matteo.gateopener.interfaces.IDTWDone;
 import com.matteo.gateopener.interfaces.IRecordingDone;
