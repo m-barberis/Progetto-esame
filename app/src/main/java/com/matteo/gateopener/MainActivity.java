@@ -9,10 +9,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.matteo.gateopener.classifier.MFCC_Classifier;
 import com.matteo.gateopener.audio_framing.Audio_Framer;
-import com.matteo.gateopener.fastdtw.dtw.FastDTW;
+import com.matteo.gateopener.fastdtw.DTW_Computing;
 import com.matteo.gateopener.fastdtw.util.DistanceFunction;
 import com.matteo.gateopener.fastdtw.util.EuclideanDistance;
-import com.matteo.gateopener.interfaces.DTWDone;
+import com.matteo.gateopener.fastdtw.util.ManhattanDistance;
+import com.matteo.gateopener.interfaces.IDTWDone;
 import com.matteo.gateopener.interfaces.IRecordingDone;
 import com.matteo.gateopener.interfaces.IRecordingProgress;
 import com.matteo.gateopener.misc.Constants;
@@ -20,7 +21,7 @@ import com.matteo.gateopener.mfcc.MFCC_Extractor;
 import com.matteo.gateopener.misc.Test;
 import com.matteo.gateopener.recorder.Recorder;
 
-public class MainActivity extends AppCompatActivity implements IRecordingDone, IRecordingProgress, DTWDone {
+public class MainActivity extends AppCompatActivity implements IRecordingDone, IRecordingProgress, IDTWDone {
     private final String TAG = "MainActivity";
     private Button bttRecord;
     private TextView tvSpeaker, tvConfidence, tvPassword, tvGateStatus;
@@ -35,11 +36,8 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
     private int topResult = 0;
     private double confidence = 0;
     private double warpDistance = 0;
-    private FastDTW fastDTW;
-
-    private boolean shouldRecordingKeepGoing = false;
-    private boolean dtw_free;
-    double[][] mfccMatrix;
+    private DTW_Computing dtw_computing;
+    private double[][] mfccMatrix;
 
 
     @Override
@@ -53,16 +51,16 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         mfcc_extractor = new MFCC_Extractor(Constants.AUDIO_SAMPLING_FREQUENCY, Constants.FRAME_SIZE, Constants.FRAME_HOP_SIZE, Constants.MFCC_COUNT);
         mfcc_classifier = new MFCC_Classifier(Constants.MFCC_COUNT, Constants.NUM_PEOPLE_TO_CLASSIFY);
         results = new int[Constants.NUM_PEOPLE_TO_CLASSIFY];
-        fastDTW = new FastDTW();
-        dtw_free = true;
-        distanceFunction = new EuclideanDistance();
+        dtw_computing = new DTW_Computing(this, 4);
+        distanceFunction = new ManhattanDistance();
 
 
 
         bttRecord.setOnClickListener( (v) -> {
-            shouldRecordingKeepGoing = true;
             recorder.start();
             bttRecord.setEnabled(false);
+            tvGateStatus.setText("");
+            tvPassword.setText("");
         } );
     }
 
@@ -77,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
 
     @Override
     public void onRecordingDone(short[] audioData) {
+        dtw_computing.computeDistances(audioData);
         mfccMatrix = mfcc_extractor.extractMFCC(audioData);
         mfcc_classifier.classifyMFCCMatrix(mfccMatrix);
         int[] results = mfcc_classifier.getResults(); // per debug
@@ -90,11 +89,11 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         //Test per MFCC
         //Test.testMFCC();
 
-        resetWidgets();
         tvSpeaker.setText(resultToString(topResult));
         tvConfidence.setText("Confidence: "+ String.format("%.2f", confidence));
         resetMfccData();
     }
+
     @Override
     public void onDTWResult(double result) {
         warpDistance = result;
@@ -110,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
     }
 
     private void setPasswordAndStatus() {
-        if (warpDistance > Constants.LOWER_DISTANCE_THRESHOLD && warpDistance < Constants.HIGHER_DISTANCE_THRESHOLD) {
+        if (warpDistance >= 0 && warpDistance < Constants.HIGHER_DISTANCE_THRESHOLD) {
             tvPassword.setText("Right password!");
             if (topResult == 2) {
                 tvGateStatus.setText("GATE OPENING...");
@@ -142,7 +141,6 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
 
     private void resetDTWData(){
         warpDistance = 0;
-
     }
 
     private String resultToString(int result){

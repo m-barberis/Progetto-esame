@@ -1,5 +1,5 @@
 package com.matteo.gateopener.interfaces;
 
-public interface DTWDone {
+public interface IDTWDone {
     void onDTWResult(double result);
 }

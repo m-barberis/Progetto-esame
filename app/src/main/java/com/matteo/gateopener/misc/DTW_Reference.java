@@ -12,10 +12,10 @@ import java.util.Collections;
 import java.util.List;
 
 public class DTW_Reference {
-    public static final int ref_0_length = 33374;
-    public static final int ref_1_length = 34808;
-    public static final int ref_2_length = 31985;
-    public static final int ref_3_length = 32041;
+    public static final int ref_0_length = 28342;
+    public static final int ref_1_length = 27657;
+    public static final int ref_2_length = 31975;
+    public static final int ref_3_length = 27880;
     public static double[] loadDoubleArrayFromRawBinary(Context context, int resId, int numDoubles) {
         double[] result = new double[numDoubles];
 
