@@ -37,7 +37,7 @@ public class DTW_Computing {
         tsRef3 = new TimeSeries(Objects.requireNonNull(DTW_Reference.loadDoubleArrayFromRawBinary(context, R.raw.torny, DTW_Reference.ref_3_length)));
     }
 
-    public void computeDistances(short[] audioData) {
+    public void computeDistances(short[] audioData, int speakerIndex) {
         new Thread(() -> {
             Handler handler = new Handler(Looper.getMainLooper());
             if (checkSilence(audioData, Constants.SILENCE_THRESHOLD_DTW)){
@@ -48,13 +48,22 @@ public class DTW_Computing {
             }
             normalizeAudioData(audioData);
             tsInput = new TimeSeries(audioData_toDouble);
-
-            distances[0] = FastDTW.getWarpDistBetween(tsInput, tsRef0, 5, distanceFunction);
-            distances[1] = FastDTW.getWarpDistBetween(tsInput, tsRef1, 5, distanceFunction);
-            distances[2] = FastDTW.getWarpDistBetween(tsInput, tsRef2, 5, distanceFunction);
-            distances[3] = FastDTW.getWarpDistBetween(tsInput, tsRef3, 5, distanceFunction);
+            switch (speakerIndex) {
+                case 0:
+                    distances[0] = FastDTW.getWarpDistBetween(tsInput, tsRef0, Constants.SEARCH_RADIUS, distanceFunction);
+                    break;
+                case 1:
+                    distances[1] = FastDTW.getWarpDistBetween(tsInput, tsRef1, Constants.SEARCH_RADIUS, distanceFunction);
+                    break;
+                case 2:
+                    distances[2] = FastDTW.getWarpDistBetween(tsInput, tsRef2, Constants.SEARCH_RADIUS, distanceFunction);
+                    break;
+                case 3:
+                    distances[3] = FastDTW.getWarpDistBetween(tsInput, tsRef3, Constants.SEARCH_RADIUS, distanceFunction);
+                    break;
+            }
             handler.post(() -> {
-                iDtwDone.onDTWResult(getMinDistance(distances));
+                iDtwDone.onDTWResult(getDistance());
             });
         }).start();
     }
@@ -68,8 +77,12 @@ public class DTW_Computing {
         return distances[first];
     }
 
-    public double[] getDistances(){
-        return distances;
+    public double getDistance(){
+        for (int i = 0; i < distances.length; i++) {
+            if (distances[i] != 0)
+                return distances[i];
+        }
+        return -1;
     }
 
     private void normalizeAudioData(short[] audioData) {

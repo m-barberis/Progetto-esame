@@ -74,16 +74,18 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
 
     @Override
     public void onRecordingDone(short[] audioData) {
-        dtw_computing.computeDistances(audioData);
+
         mfccMatrix = mfcc_extractor.extractMFCC(audioData);
         mfcc_classifier.classifyMFCCMatrix(mfccMatrix);
         int[] results = mfcc_classifier.getResults(); // per debug
         topResult = mfcc_classifier.getTopResult();
         confidence = mfcc_classifier.getConfidence();
 
+        dtw_computing.computeDistances(audioData, topResult);
+
 
         //Test per DTW
-        Test.testDTW();
+        //Test.testDTW();
 
         //Test per MFCC
         //Test.testMFCC();
