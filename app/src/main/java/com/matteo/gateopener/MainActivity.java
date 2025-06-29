@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
     private final String TAG = "MainActivity";
     private Button bttRecord;
     private TextView tvSpeaker, tvConfidence, tvPassword, tvGateStatus;
-    private ProgressBar PGrecording;
+    private ProgressBar PGrecording, PGloading;
     private Recorder recorder;
     private Audio_Framer audioFramer;
     private MFCC_Extractor mfcc_extractor;
@@ -58,6 +58,8 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         bttRecord.setOnClickListener( (v) -> {
             recorder.start();
             bttRecord.setEnabled(false);
+            tvSpeaker.setText("");
+            tvConfidence.setText("");
             tvGateStatus.setText("");
             tvPassword.setText("");
         } );
@@ -70,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         tvPassword = findViewById(R.id.tvPassword);
         tvGateStatus = findViewById(R.id.tvGateStatus);
         PGrecording = findViewById(R.id.PGrecording);
+        PGloading = findViewById(R.id.PGloading);
     }
 
     @Override
@@ -82,7 +85,8 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         confidence = mfcc_classifier.getConfidence();
 
         //dtw_computing.computeDistancesFaster(audioData, topResult); //7 sec circa
-        dtw_computing.computeDistances(audioData); //23 secondi
+        dtw_computing.computeDistances(audioData);
+        PGloading.setVisibility(ProgressBar.VISIBLE);//23 secondi
 
         //Test per DTW
         //Test.testDTW();
@@ -97,6 +101,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
 
     @Override
     public void onDTWResult(double result) {
+        PGloading.setVisibility(ProgressBar.INVISIBLE);
         warpDistance = result;
         setPasswordAndStatus();
         resetDTWData();
