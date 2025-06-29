@@ -141,7 +141,6 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         for (int i = 0; i < results.length; i++) {
             results[i] = 0;
         }
-        topResult = 0;
         mfcc_classifier.reset();
     }
 
