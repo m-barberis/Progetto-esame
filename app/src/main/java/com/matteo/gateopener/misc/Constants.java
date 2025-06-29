@@ -10,6 +10,6 @@ public class Constants {
     public static final int NUM_PEOPLE_TO_CLASSIFY = 4;
     //public static final int LOWER_DISTANCE_THRESHOLD = 8;
     public static final int HIGHER_DISTANCE_THRESHOLD = 400;
-    public static final int SEARCH_RADIUS = 1;
+    public static final int SEARCH_RADIUS = 3;
     public static final short SILENCE_THRESHOLD_DTW = 1000;
 }

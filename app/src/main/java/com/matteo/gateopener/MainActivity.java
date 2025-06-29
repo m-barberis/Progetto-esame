@@ -81,8 +81,8 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         topResult = mfcc_classifier.getTopResult();
         confidence = mfcc_classifier.getConfidence();
 
-        dtw_computing.computeDistances(audioData, topResult);
-
+        //dtw_computing.computeDistancesFaster(audioData, topResult); //7 sec circa
+        dtw_computing.computeDistances(audioData); //23 secondi
 
         //Test per DTW
         //Test.testDTW();
@@ -142,6 +142,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
 
     private void resetDTWData(){
         warpDistance = 0;
+        dtw_computing.reset();
     }
 
     private String resultToString(int result){

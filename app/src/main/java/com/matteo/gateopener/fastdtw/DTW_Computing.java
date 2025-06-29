@@ -37,7 +37,28 @@ public class DTW_Computing {
         tsRef3 = new TimeSeries(Objects.requireNonNull(DTW_Reference.loadDoubleArrayFromRawBinary(context, R.raw.torny, DTW_Reference.ref_3_length)));
     }
 
-    public void computeDistances(short[] audioData, int speakerIndex) {
+    public void computeDistances(short[] audioData) {
+        new Thread(() -> {
+            Handler handler = new Handler(Looper.getMainLooper());
+            if (checkSilence(audioData, Constants.SILENCE_THRESHOLD_DTW)){
+                handler.post(() -> {
+                    iDtwDone.onDTWResult(-1);
+                });
+                return;
+            }
+            normalizeAudioData(audioData);
+            tsInput = new TimeSeries(audioData_toDouble);
+
+            distances[0] = FastDTW.getWarpDistBetween(tsInput, tsRef0, Constants.SEARCH_RADIUS, distanceFunction);
+            distances[1] = FastDTW.getWarpDistBetween(tsInput, tsRef1, Constants.SEARCH_RADIUS, distanceFunction);
+            distances[2] = FastDTW.getWarpDistBetween(tsInput, tsRef2, Constants.SEARCH_RADIUS, distanceFunction);
+            distances[3] = FastDTW.getWarpDistBetween(tsInput, tsRef3, Constants.SEARCH_RADIUS, distanceFunction);
+            handler.post(() -> {
+                iDtwDone.onDTWResult(getMinDistance(distances));
+            });
+        }).start();
+    }
+    public void computeDistancesFaster(short[] audioData, int speakerIndex) {
         new Thread(() -> {
             Handler handler = new Handler(Looper.getMainLooper());
             if (checkSilence(audioData, Constants.SILENCE_THRESHOLD_DTW)){
@@ -65,6 +86,7 @@ public class DTW_Computing {
             handler.post(() -> {
                 iDtwDone.onDTWResult(getDistance());
             });
+
         }).start();
     }
     public double getMinDistance(double[] distances) {
@@ -96,6 +118,8 @@ public class DTW_Computing {
         for (int i = 0; i < numReferences; i++) {
             distances[i] = 0;
         }
+        audioData_toDouble = null;
+        tsInput = null;
     }
 
     private boolean checkSilence(short[] audioData, short silenceThreshold) {
