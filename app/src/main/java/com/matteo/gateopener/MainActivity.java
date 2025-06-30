@@ -29,7 +29,6 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
     private Audio_Framer audioFramer;
     private MFCC_Extractor mfcc_extractor;
     private MFCC_Classifier mfcc_classifier;
-    private DistanceFunction distanceFunction;
 
     private int[] results;
     private int topResult = 0;
@@ -50,8 +49,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         mfcc_extractor = new MFCC_Extractor(Constants.AUDIO_SAMPLING_FREQUENCY, Constants.FRAME_SIZE, Constants.FRAME_HOP_SIZE, Constants.MFCC_COUNT);
         mfcc_classifier = new MFCC_Classifier(Constants.MFCC_COUNT, Constants.NUM_PEOPLE_TO_CLASSIFY);
         results = new int[Constants.NUM_PEOPLE_TO_CLASSIFY];
-        dtw_computing = new DTW_Computing(this, 4);
-        distanceFunction = new ManhattanDistance();
+        dtw_computing = new DTW_Computing(this, Constants.NUM_REFERENCES);
 
 
 
@@ -117,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
     private void setPasswordAndStatus() {
         if (warpDistance >= 0 && warpDistance < Constants.HIGHER_DISTANCE_THRESHOLD) {
             tvPassword.setText("Right password!");
-            if (topResult == 2) {
+            if (topResult == Constants.GATE_OPENER_INDEX) {
                 tvGateStatus.setText("GATE OPENING...");
             }
             else {
