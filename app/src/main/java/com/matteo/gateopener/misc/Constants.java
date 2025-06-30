@@ -12,5 +12,5 @@ public class Constants {
     public static final int SEARCH_RADIUS = 3;
     public static final int NUM_REFERENCES = 4;
     public static final int GATE_OPENER_INDEX = 2; //MatteBarba
-    public static final short SILENCE_THRESHOLD_DTW = 1000;
+    public static final double SILENCE_THRESHOLD_DTW = 3.0E10;
 }

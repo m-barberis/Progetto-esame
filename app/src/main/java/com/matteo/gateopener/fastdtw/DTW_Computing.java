@@ -9,7 +9,7 @@ import com.matteo.gateopener.fastdtw.dtw.FastDTW;
 import com.matteo.gateopener.fastdtw.timeseries.TimeSeries;
 import com.matteo.gateopener.fastdtw.util.DistanceFunction;
 import com.matteo.gateopener.fastdtw.util.EuclideanDistance;
-import com.matteo.gateopener.interfaces.IDTWDone;
+import com.matteo.gateopener.interfaces.IDTWResult;
 import com.matteo.gateopener.misc.Constants;
 import com.matteo.gateopener.misc.DTW_Reference;
 import java.util.Objects;
@@ -21,49 +21,50 @@ public class DTW_Computing {
 
     static private DistanceFunction distanceFunction;
     private int numReferences;
-    private double[] distances;
-    private IDTWDone iDtwDone;
-    TimeSeries tsInput, tsRef0, tsRef1, tsRef2, tsRef3;
+    private double distance;
+    private IDTWResult iDtwDone;
+    TimeSeries tsInput;
+    TimeSeries[] tsRef;
     public DTW_Computing(Context context, int numReferences) {
         this.context = context;
-        this.iDtwDone = (IDTWDone) context;
+        this.iDtwDone = (IDTWResult) context;
         this.numReferences = numReferences;
-        distances = new double[numReferences];
         distanceFunction = new EuclideanDistance();
+        tsRef = new TimeSeries[numReferences];
 
-        tsRef0 = new TimeSeries(Objects.requireNonNull(DTW_Reference.loadDoubleArrayFromRawBinary(context, R.raw.berto, DTW_Reference.ref_0_length)));
-        tsRef1 = new TimeSeries(Objects.requireNonNull(DTW_Reference.loadDoubleArrayFromRawBinary(context, R.raw.iazze, DTW_Reference.ref_1_length)));
-        tsRef2 = new TimeSeries(Objects.requireNonNull(DTW_Reference.loadDoubleArrayFromRawBinary(context, R.raw.matteob, DTW_Reference.ref_2_length)));
-        tsRef3 = new TimeSeries(Objects.requireNonNull(DTW_Reference.loadDoubleArrayFromRawBinary(context, R.raw.torny, DTW_Reference.ref_3_length)));
+        tsRef[0] = new TimeSeries(Objects.requireNonNull(DTW_Reference.loadDoubleArrayFromRawBinary(context, R.raw.berto, DTW_Reference.ref_0_length)));
+        tsRef[1] = new TimeSeries(Objects.requireNonNull(DTW_Reference.loadDoubleArrayFromRawBinary(context, R.raw.iazze, DTW_Reference.ref_1_length)));
+        tsRef[2] = new TimeSeries(Objects.requireNonNull(DTW_Reference.loadDoubleArrayFromRawBinary(context, R.raw.matteob, DTW_Reference.ref_2_length)));
+        tsRef[3] = new TimeSeries(Objects.requireNonNull(DTW_Reference.loadDoubleArrayFromRawBinary(context, R.raw.torny, DTW_Reference.ref_3_length)));
     }
 
     public void computeDistances(short[] audioData) {
-        new Thread(() -> {
-            Handler handler = new Handler(Looper.getMainLooper());
-            if (checkSilence(audioData, Constants.SILENCE_THRESHOLD_DTW)){
-                handler.post(() -> {
-                    iDtwDone.onDTWResult(-1);
-                });
-                return;
-            }
-            normalizeAudioData(audioData);
-            tsInput = new TimeSeries(audioData_toDouble);
-
-            distances[0] = FastDTW.getWarpDistBetween(tsInput, tsRef0, Constants.SEARCH_RADIUS, distanceFunction);
-            distances[1] = FastDTW.getWarpDistBetween(tsInput, tsRef1, Constants.SEARCH_RADIUS, distanceFunction);
-            distances[2] = FastDTW.getWarpDistBetween(tsInput, tsRef2, Constants.SEARCH_RADIUS, distanceFunction);
-            distances[3] = FastDTW.getWarpDistBetween(tsInput, tsRef3, Constants.SEARCH_RADIUS, distanceFunction);
+        Handler handler = new Handler(Looper.getMainLooper());
+        if (checkSilence(audioData, Constants.SILENCE_THRESHOLD_DTW)){
             handler.post(() -> {
-                iDtwDone.onDTWResult(getMinDistance(distances));
+                iDtwDone.onDTWSingleResult(-2, 0);
             });
-        }).start();
+            return;
+        }
+        normalizeAudioData(audioData);
+        tsInput = new TimeSeries(audioData_toDouble);
+        for (int i = 0; i < tsRef.length; i++) {
+            final int finalI = i; //Serve per lambda expression
+            new Thread(() -> {
+                distance = FastDTW.getWarpDistBetween(tsInput, tsRef[finalI], Constants.SEARCH_RADIUS, distanceFunction);
+                handler.post(() -> {
+                    iDtwDone.onDTWSingleResult(distance, finalI);
+                });
+            }).start();
+        }
     }
+    /*
     public void computeDistancesFaster(short[] audioData, int speakerIndex) {
         new Thread(() -> {
             Handler handler = new Handler(Looper.getMainLooper());
             if (checkSilence(audioData, Constants.SILENCE_THRESHOLD_DTW)){
                 handler.post(() -> {
-                    iDtwDone.onDTWResult(-1);
+                    iDtwDone.onDTWSingleResult(-1);
                 });
                 return;
             }
@@ -84,12 +85,13 @@ public class DTW_Computing {
                     break;
             }
             handler.post(() -> {
-                iDtwDone.onDTWResult(getDistance());
+                iDtwDone.onDTWSingleResult(getDistance());
             });
 
         }).start();
     }
-    public double getMinDistance(double[] distances) {
+    */
+    public static double getMinDistance(double[] distances) {
         int first = 0;
         for (int i = 0; i < distances.length; i++) {
             if (distances[i] <= distances[first]) {
@@ -99,14 +101,6 @@ public class DTW_Computing {
         return distances[first];
     }
 
-    public double getDistance(){
-        for (int i = 0; i < distances.length; i++) {
-            if (distances[i] != 0)
-                return distances[i];
-        }
-        return -1;
-    }
-
     private void normalizeAudioData(short[] audioData) {
         audioData_toDouble = new double[audioData.length];
         for (int i = 0; i < audioData.length; i++) {
@@ -114,24 +108,19 @@ public class DTW_Computing {
         }
     }
 
-    public void reset() {
-        for (int i = 0; i < numReferences; i++) {
-            distances[i] = 0;
+    private boolean checkSilence(short[] audioData, double silenceThreshold) {
+        double total = 0;
+        for (int i = 0; i < audioData.length; i++){
+            total += (double)audioData[i] * (double)audioData[i];
         }
-        audioData_toDouble = null;
-        tsInput = null;
+        if (total <= silenceThreshold){
+            return true;
+        }
+        return false;
     }
 
-    private boolean checkSilence(short[] audioData, short silenceThreshold) {
-        int i = 0;
-        while (i < audioData.length){
-            if (audioData[i] > silenceThreshold){
-                return false;
-            }
-            i++;
-        }
-        return true;
+    public void reset(){
+        distance = -1;
     }
-
 
 }

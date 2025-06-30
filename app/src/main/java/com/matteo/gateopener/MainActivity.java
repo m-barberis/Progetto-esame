@@ -10,17 +10,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.matteo.gateopener.classifier.MFCC_Classifier;
 import com.matteo.gateopener.audio_framing.Audio_Framer;
 import com.matteo.gateopener.fastdtw.DTW_Computing;
-import com.matteo.gateopener.fastdtw.util.DistanceFunction;
-import com.matteo.gateopener.fastdtw.util.ManhattanDistance;
-import com.matteo.gateopener.interfaces.IDTWDone;
+import com.matteo.gateopener.interfaces.IDTWResult;
 import com.matteo.gateopener.interfaces.IRecordingDone;
 import com.matteo.gateopener.interfaces.IRecordingProgress;
 import com.matteo.gateopener.misc.Constants;
 import com.matteo.gateopener.mfcc.MFCC_Extractor;
-import com.matteo.gateopener.misc.Test;
 import com.matteo.gateopener.recorder.Recorder;
 
-public class MainActivity extends AppCompatActivity implements IRecordingDone, IRecordingProgress, IDTWDone {
+public class MainActivity extends AppCompatActivity implements IRecordingDone, IRecordingProgress, IDTWResult {
     private final String TAG = "MainActivity";
     private Button bttRecord;
     private TextView tvSpeaker, tvConfidence, tvPassword, tvGateStatus;
@@ -30,10 +27,10 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
     private MFCC_Extractor mfcc_extractor;
     private MFCC_Classifier mfcc_classifier;
 
-    private int[] results;
+    private int[] mfcc_results;
     private int topResult = 0;
     private double confidence = 0;
-    private double warpDistance = 0;
+    private double[] distances;
     private DTW_Computing dtw_computing;
     private double[][] mfccMatrix;
 
@@ -48,9 +45,12 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         audioFramer = new Audio_Framer(Constants.FRAME_SIZE, Constants.FRAME_HOP_SIZE);
         mfcc_extractor = new MFCC_Extractor(Constants.AUDIO_SAMPLING_FREQUENCY, Constants.FRAME_SIZE, Constants.FRAME_HOP_SIZE, Constants.MFCC_COUNT);
         mfcc_classifier = new MFCC_Classifier(Constants.MFCC_COUNT, Constants.NUM_PEOPLE_TO_CLASSIFY);
-        results = new int[Constants.NUM_PEOPLE_TO_CLASSIFY];
+        mfcc_results = new int[Constants.NUM_PEOPLE_TO_CLASSIFY];
         dtw_computing = new DTW_Computing(this, Constants.NUM_REFERENCES);
-
+        distances = new double[Constants.NUM_REFERENCES];
+        for (int i = 0; i < distances.length; i++){
+            distances[i] = -1;
+        }
 
 
         bttRecord.setOnClickListener( (v) -> {
@@ -98,12 +98,24 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
     }
 
     @Override
-    public void onDTWResult(double result) {
-        PGloading.setVisibility(ProgressBar.INVISIBLE);
-        warpDistance = result;
-        setPasswordAndStatus();
-        resetDTWData();
-        resetWidgets();
+    public void onDTWSingleResult(double result, int position) {
+        distances[position] = result;
+        if (dtw_finished(distances)){
+            double min_distance = DTW_Computing.getMinDistance(distances);
+            PGloading.setVisibility(ProgressBar.INVISIBLE);
+            setPasswordAndStatus(min_distance);
+            resetDTWData();
+            enableRecordButton();
+        }
+    }
+
+    private boolean dtw_finished(double[] distances){
+        for (int i = 0; i < distances.length; i++){
+            if (distances[i] == -1){
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -112,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         PGrecording.setProgress(progress);
     }
 
-    private void setPasswordAndStatus() {
+    private void setPasswordAndStatus(double warpDistance) {
         if (warpDistance >= 0 && warpDistance < Constants.HIGHER_DISTANCE_THRESHOLD) {
             tvPassword.setText("Right password!");
             if (topResult == Constants.GATE_OPENER_INDEX) {
@@ -127,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
             tvGateStatus.setText("GATE CLOSED");
         }
     }
-    private void resetWidgets(){
+    private void enableRecordButton(){
         bttRecord.setEnabled(true);
     }
 
@@ -136,14 +148,13 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         mfccMatrix = null;
 
         // Resetta i risultati di classificazione
-        for (int i = 0; i < results.length; i++) {
-            results[i] = 0;
+        for (int i = 0; i < mfcc_results.length; i++) {
+            mfcc_results[i] = 0;
         }
         mfcc_classifier.reset();
     }
 
     private void resetDTWData(){
-        warpDistance = 0;
         dtw_computing.reset();
     }
 
