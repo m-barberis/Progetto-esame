@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
     private Audio_Framer audioFramer;
     private MFCC_Extractor mfcc_extractor;
     private MFCC_Classifier mfcc_classifier;
+    int frame_length_samples;
 
     private int[] mfcc_results;
     private int topResult = 0;
@@ -41,9 +42,10 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         setContentView(R.layout.activity_main);
 
         initViews();
+        frame_length_samples = (int)(Constants.FRAME_LENGTH_MS / 1000 * Constants.AUDIO_SAMPLING_FREQUENCY);
         recorder = new Recorder(this, Constants.AUDIO_SAMPLING_FREQUENCY, Constants.MAX_RECORDING_TIME_MS);
-        audioFramer = new Audio_Framer(Constants.FRAME_SIZE, Constants.FRAME_HOP_SIZE);
-        mfcc_extractor = new MFCC_Extractor(Constants.AUDIO_SAMPLING_FREQUENCY, Constants.FRAME_SIZE, Constants.FRAME_HOP_SIZE, Constants.MFCC_COUNT);
+        audioFramer = new Audio_Framer(frame_length_samples, Constants.FRAME_HOP_SIZE);
+        mfcc_extractor = new MFCC_Extractor(Constants.AUDIO_SAMPLING_FREQUENCY, frame_length_samples, Constants.FRAME_HOP_SIZE, Constants.MFCC_COUNT);
         mfcc_classifier = new MFCC_Classifier(Constants.MFCC_COUNT, Constants.NUM_PEOPLE_TO_CLASSIFY);
         mfcc_results = new int[Constants.NUM_PEOPLE_TO_CLASSIFY];
         dtw_computing = new DTW_Computing(this, Constants.NUM_REFERENCES);

@@ -4,7 +4,6 @@ import com.matteo.gateopener.fastdtw.dtw.FastDTW;
 import com.matteo.gateopener.fastdtw.timeseries.TimeSeries;
 import com.matteo.gateopener.fastdtw.util.EuclideanDistance;
 import com.matteo.gateopener.fastdtw.util.DistanceFunction;
-import com.matteo.gateopener.fastdtw.util.ManhattanDistance;
 import com.matteo.gateopener.mfcc.MFCC_Extractor;
 
 
@@ -31,7 +30,7 @@ public class Test {
 
 
     public void testMFCC() {
-        mfcc_extractor = new MFCC_Extractor(Constants.AUDIO_SAMPLING_FREQUENCY, Constants.FRAME_SIZE, Constants.FRAME_HOP_SIZE, Constants.MFCC_COUNT);
+        mfcc_extractor = new MFCC_Extractor(Constants.AUDIO_SAMPLING_FREQUENCY, (int)(Constants.AUDIO_SAMPLING_FREQUENCY * Constants.FRAME_LENGTH_MS / 1000), Constants.FRAME_HOP_SIZE, Constants.MFCC_COUNT);
         short[] y = new short[400];
         for (int i = 0; i < 400; i++){
             y[i] = (short)i;
