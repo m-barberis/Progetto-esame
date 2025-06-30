@@ -4,32 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MelFilterBank {
-    /**
-     * Converts a frequency in Hz to Mel scale.
-     * @param freqHz Frequency in Hz.
-     * @return Frequency in Mels.
-     */
+
     public static double fromHzToMel(double freqHz) {
         return 1125 * Math.log(1 + freqHz / 700.0);
     }
 
-    /**
-     * Converts a frequency in Mel scale to Hz.
-     * @param mel Frequency in Mels.
-     * @return Frequency in Hz.
-     */
+
     public static double fromMelToHz(double mel) {
         return 700 * (Math.exp(mel / 1125.0) - 1);
     }
 
-    /**
-     * Compute filter indexes for the MEL filter bank.
-     * @param nFilter Number of MEL filters.
-     * @param firstFreq Starting frequency.
-     * @param lastFreq Ending frequency.
-     * @param f Array of discrete frequencies.
-     * @return Array of filter indexes (size: nFilter + 2)
-     */
+
     private static int[] computeMelFiltersIndexes(int nFilter, double firstFreq, double lastFreq, float[] f) {
         int nPoints = nFilter + 2;
 
@@ -53,7 +38,7 @@ public class MelFilterBank {
         //alle frequenze appena calcolate
         int[] filterIndexes = new int[nPoints];
         for (int i = 0; i < nPoints; i++) {
-            filterIndexes[i] = findIndex(f, (float) freqVector[i]);
+            filterIndexes[i] = findIndex(f, (float) freqVector[i]); //f asse delle frequenze "normale", freqVector array dei punti Mel in frequenze.
         }
 
         return filterIndexes;
