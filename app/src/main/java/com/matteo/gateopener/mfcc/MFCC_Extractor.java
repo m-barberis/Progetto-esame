@@ -30,12 +30,8 @@ public class MFCC_Extractor {
 
     }
 
-    /**
-     * Estrae MFCC da un array di short (PCM 16-bit mono).
-     *
-     * @param audioData Array di campioni audio in formato short (PCM 16-bit mono)
-     * @return Matrice MFCC [frame][coefficiente]
-     */
+
+   // Estrae MFCC da un array di short (PCM 16-bit mono)
     public double[][] extractMFCC(short[] audioData) {
         if (audioData == null || audioData.length < FRAME_SIZE) {
             return new double[0][MFCC_COUNT];
@@ -82,7 +78,7 @@ public class MFCC_Extractor {
             }
             filterBankEnergies[i] = Math.log(filterBankEnergies[i]);
         }
-        double[] frame_mfcc = DCT.computeDCT(filterBankEnergies, 13);
+        double[] frame_mfcc = DCT.computeDCT(filterBankEnergies, Constants.MFCC_COUNT);
 
         return frame_mfcc;
     }
