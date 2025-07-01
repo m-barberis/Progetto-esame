@@ -30,7 +30,10 @@ public class Test {
 
 
     public void testMFCC() {
-        mfcc_extractor = new MFCC_Extractor(Constants.AUDIO_SAMPLING_FREQUENCY, (int)(Constants.AUDIO_SAMPLING_FREQUENCY * Constants.FRAME_LENGTH_MS / 1000), Constants.FRAME_HOP_SIZE, Constants.MFCC_COUNT);
+        mfcc_extractor = new MFCC_Extractor(Constants.AUDIO_SAMPLING_FREQUENCY,
+                (int)(Constants.AUDIO_SAMPLING_FREQUENCY * Constants.FRAME_LENGTH_MS / 1000),
+                (int)(Constants.AUDIO_SAMPLING_FREQUENCY * Constants.FRAME_HOP_SIZE_MS / 1000),
+                Constants.MFCC_COUNT);
         short[] y = new short[400];
         for (int i = 0; i < 400; i++){
             y[i] = (short)i;

@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
     private MFCC_Extractor mfcc_extractor;
     private MFCC_Classifier mfcc_classifier;
     int frame_length_samples;
-
+    int hop_size_samples;
     private int[] mfcc_results;
     private int topResult = 0;
     private double confidence = 0;
@@ -43,9 +43,10 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
 
         initViews();
         frame_length_samples = (int)((double)Constants.FRAME_LENGTH_MS / 1000.0 * (double)Constants.AUDIO_SAMPLING_FREQUENCY);
+        hop_size_samples = (int)((double)Constants.FRAME_HOP_SIZE_MS / 1000.0 * (double)Constants.AUDIO_SAMPLING_FREQUENCY);
         recorder = new Recorder(this, Constants.AUDIO_SAMPLING_FREQUENCY, Constants.MAX_RECORDING_TIME_MS);
-        audioFramer = new Audio_Framer(frame_length_samples, Constants.FRAME_HOP_SIZE);
-        mfcc_extractor = new MFCC_Extractor(Constants.AUDIO_SAMPLING_FREQUENCY, frame_length_samples, Constants.FRAME_HOP_SIZE, Constants.MFCC_COUNT);
+        audioFramer = new Audio_Framer(frame_length_samples, hop_size_samples);
+        mfcc_extractor = new MFCC_Extractor(Constants.AUDIO_SAMPLING_FREQUENCY, frame_length_samples, hop_size_samples, Constants.MFCC_COUNT);
         mfcc_classifier = new MFCC_Classifier(Constants.MFCC_COUNT, Constants.NUM_PEOPLE_TO_CLASSIFY);
         mfcc_results = new int[Constants.NUM_PEOPLE_TO_CLASSIFY];
         dtw_computing = new DTW_Computing(this, Constants.NUM_REFERENCES);
