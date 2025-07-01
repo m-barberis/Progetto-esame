@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         setContentView(R.layout.activity_main);
 
         initViews();
-        frame_length_samples = (int)(Constants.FRAME_LENGTH_MS / 1000 * Constants.AUDIO_SAMPLING_FREQUENCY);
+        frame_length_samples = (int)((double)Constants.FRAME_LENGTH_MS / 1000.0 * (double)Constants.AUDIO_SAMPLING_FREQUENCY);
         recorder = new Recorder(this, Constants.AUDIO_SAMPLING_FREQUENCY, Constants.MAX_RECORDING_TIME_MS);
         audioFramer = new Audio_Framer(frame_length_samples, Constants.FRAME_HOP_SIZE);
         mfcc_extractor = new MFCC_Extractor(Constants.AUDIO_SAMPLING_FREQUENCY, frame_length_samples, Constants.FRAME_HOP_SIZE, Constants.MFCC_COUNT);
@@ -50,9 +50,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         mfcc_results = new int[Constants.NUM_PEOPLE_TO_CLASSIFY];
         dtw_computing = new DTW_Computing(this, Constants.NUM_REFERENCES);
         distances = new double[Constants.NUM_REFERENCES];
-        for (int i = 0; i < distances.length; i++){
-            distances[i] = -1;
-        }
+        reset_distances_array();
 
 
         bttRecord.setOnClickListener( (v) -> {
@@ -158,6 +156,7 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
 
     private void resetDTWData(){
         dtw_computing.reset();
+        reset_distances_array();
     }
 
     private String resultToString(int result){
@@ -175,4 +174,9 @@ public class MainActivity extends AppCompatActivity implements IRecordingDone, I
         }
     }
 
+    private void reset_distances_array() {
+        for (int i = 0; i < distances.length; i++){
+            distances[i] = -1;
+        }
+    }
 }
